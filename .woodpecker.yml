@@ -1,0 +1,10 @@
+steps:
+  merge:
+    image: alpine
+    commands:
+      - apk add --no-cache build-base gcc cmake pkgconf openssl-dev >/dev/null
+      - cmake -DCMAKE_BUILD_TYPE=Debug .
+      - make
+      - ctest
+    when:
+      event: pull_request

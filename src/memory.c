@@ -4,8 +4,7 @@
 #include "memory.h"
 
 char *cpr_hexdup(const uint8_t *bin, size_t size) {
-    static char *hex = "0123456789abcdef";
-
+    static const char *hex = "0123456789abcdef";
     if (!bin) return NULL;
     char *out = malloc((size * 2) + 1);
     if (!out) return NULL;

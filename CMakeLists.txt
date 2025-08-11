@@ -28,6 +28,12 @@ enable_testing()
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 add_library(cpr ${sources} ${headers})
+if(BUILD_SHARED_LIBS AND CMAKE_BUILD_TYPE MATCHES "^Rel")
+    set_target_properties(cpr PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+    )
+endif()
 
 # testing
 
@@ -86,7 +92,14 @@ install(TARGETS cpr
     EXPORT cprTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cpr
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cpr
+)
+
+install(EXPORT cprTargets
+    FILE libcprTargets.cmake
+    NAMESPACE libcpr::
+    DESTINATION lib/cmake/libcpr
 )
 

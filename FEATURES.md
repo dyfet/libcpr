@@ -5,6 +5,12 @@ files with inline static functions and simple C pre-procrssor macros that
 typically are installed under and included from /usr/include/cpr. These
 currently include:
 
+## cpr/bufio.h
+
+Basic low level stream and zero copy buffered I/O access to a low level file
+descriptors. This provides a low level buffered i/o concept similar to bufio in
+golang.
+
 ## cpr/clock.h
 
 Hi resolution monotomic clocking functions and monotomic thread support. This

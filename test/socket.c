@@ -3,6 +3,7 @@
 
 #undef  NDEBUG
 #include <assert.h>
+#include "../src/bufio.h"
 #include "../src/socket.h"
 
 int main(int argc, char **argv) {

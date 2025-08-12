@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #ifndef __STDC_NO_ATOMICS__
 #include <stdatomic.h>
@@ -36,6 +37,23 @@ void *cpr_ref(memshare_t ptr);
 unsigned cpr_count(memshare_t ptr);
 memshare_t cpr_retain(memshare_t ptr);
 memshare_t cpr_release(memshare_t ptr);
+
+static inline FILE *cpr_memread(const void *from, size_t size) {
+    if (!from || size == 0) return NULL;
+    return fmemopen((void *)from, size, "r");
+}
+
+static inline FILE *cpr_memwrite(void *data, size_t size) {
+    if (!data || size == 0) return NULL;
+    return fmemopen(data, size, "w");
+}
+
+static inline FILE *cpr_memstring(const char *text, size_t max) {
+    if (!text) return NULL;
+    max = cpr_strlen(text, max);
+    if (!max) return NULL;
+    return fmemopen((void *)text, max, "r");
+}
 
 #define NEWP(ptr, T) (T *)cpr_new((void **)&ptr, sizeof(T))
 #define FREEP(ptr) cpr_free((void **)&ptr)

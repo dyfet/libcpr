@@ -7,9 +7,10 @@ currently include:
 
 ## cpr/bufio.h
 
-Basic low level stream and zero copy buffered I/O access to a low level file
-descriptors. This provides a low level buffered i/o concept similar to bufio in
-golang.
+Basic full duplex llow level zero copy stream buffered I/O access to low
+level file descriptors. This provides a low level buffered i/o concept similar
+to bufio in golang. In addition, bufio handles tty descriptors by restoring
+terminal settings at close, and performing shutdown for sockets.
 
 ## cpr/clock.h
 
@@ -25,6 +26,14 @@ Functions to store into and access memory pointer data by endian order.
 
 Parses config files that may be broken into \[sections\] and have key=value key
 pairs in each section.
+
+## cpr/memio.h
+
+Memory "I/O" patterned on bufio.  While bufio was meant to parse and support
+TCP sockets and TTY sessions, memio offers a similar interface for low level
+fixed blocks of memory. The idea is that one might use memio to parse UDP
+packets in a similar way as bufio would offer for TCP streams, such as for
+parsing SIP message packets.
 
 ## cpr/memory.h
 

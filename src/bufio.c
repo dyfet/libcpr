@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 
 void cpr_freebuf(bufio_t *r) {
+    cpr_flushbuf(r);
     if (r->fd > -1 && isatty(r->fd)) {
         tcdrain(r->fd);
         tcsetattr(r->fd, TCSANOW, &r->tty);
@@ -25,7 +26,7 @@ void cpr_freebuf(bufio_t *r) {
 
 bufio_t *cpr_makebuf(int fd, size_t bufsize) {
     if (fd < 0 || !bufsize) return NULL;
-    bufio_t *r = malloc(sizeof(bufio_t) + bufsize);
+    bufio_t *r = malloc(sizeof(bufio_t) + (bufsize * 2));
     if (!r) return NULL;
     if (isatty(fd)) {
         struct termios t;
@@ -51,85 +52,98 @@ bufio_t *cpr_makebuf(int fd, size_t bufsize) {
     return r;
 }
 
-const char *cpr_fetchbuf(bufio_t *r, size_t *outlen, const char *delim) {
-    if (!r) return NULL;
-    if (delim == NULL) delim = "\n";
-    size_t delim_len = strlen(delim);
-    while (1) {
-        for (size_t i = r->start; i + delim_len <= r->end; ++i) {
-            if (memcmp(&r->buf[i], delim, delim_len) == 0) {
-                const char *result = &r->buf[r->start];
-                size_t len = i - r->start;
+bool cpr_flushbuf(bufio_t *w) {
+    if (!w || !w->put) return false;
+    char *out = ((char *)w) + sizeof(bufio_t) + w->bufsize;
+    ssize_t result = write(w->fd, out, w->put);
+    // TODO: partial saves should do buffer move to front?
+    if (result < w->put) return false;
+    w->put = 0;
+    return true;
+}
 
+bool cpr_xputbuf(bufio_t *w, const void *data, size_t request) {
+    if (!data || !w || request > w->bufsize) return false;
+    char *out = ((char *)w) + sizeof(bufio_t) + w->bufsize;
+    if (request + w->put > w->bufsize) {
+        if (!cpr_flushbuf(w)) return false;
+    }
+    memcpy(&out[w->put], data, request);
+    w->put += request;
+    return true;
+}
+
+bool cpr_sputbuf(bufio_t *w, const char *text) {
+    if (!text) return false;
+    // +1 so if string is too big it falls thru false
+    return cpr_xputbuf(w, text, cpr_strlen(text, w->bufsize + 1));
+}
+
+bool cpr_fillbuf(bufio_t *r, size_t request) {
+    if (!r || request > r->bufsize) return false;
+    size_t remains = r->end - r->start;
+    size_t avail = r->bufsize - r->start;
+    bool refill = false;
+    if (request == 0) { // refill for delim parsing scanners
+        request = r->bufsize;
+        refill = true;
+    }
+    // if we don't have enouigh data...
+    if (remains < request) { // see if we need to move
+        if (avail < request && r->start < r->end) {
+            memmove(r->buf, &r->buf[r->start], r->end - r->start);
+            r->end -= r->start;
+            r->start = 0;
+        }
+        // read any extra data to complete request
+        ssize_t n = read(r->fd, &r->buf[r->end], r->bufsize - r->start);
+        if (n > 0) {
+            r->end += n;
+            r->buf[r->end] = 0;
+            if ((r->end - r->start) < request) return false;
+        } else {
+            r->buf[r->end] = 0;
+            if (n == 0) return false; // always false if eof...
+            return refill;            // for parser can have less than request
+        }
+    } else
+        r->buf[r->end] = 0; // use null byte, even if full, overflow space
+    return true;
+}
+
+const void *cpr_xgetbuf(bufio_t *r, size_t request) {
+    if (!r || r->bufsize < request) return NULL;
+    if (!cpr_fillbuf(r, request)) return NULL;
+    void *out = &r->buf[r->start];
+    r->start += request;
+    return out;
+}
+
+const char *cpr_lgetbuf(bufio_t *r, size_t *outlen, const char *delim) {
+    if (!r) return NULL;
+    if (!delim) delim = "\n";
+    size_t delim_len = strlen(delim);
+    size_t scan = r->start;
+    for (;;) {
+        while (scan + delim_len <= r->end) {
+            if (memcmp(&r->buf[scan], delim, delim_len) == 0) {
+                size_t len = scan - r->start;
+                const char *result = &r->buf[r->start];
                 if (outlen) {
                     *outlen = len;
                 } else {
-                    if (i + delim_len < r->bufsize + 1) {
-                        r->buf[i + delim_len] = '\0';
-                    } else {
-                        return NULL;
+                    if (r->start + len < r->bufsize) {
+                        r->buf[r->start + len] = 0;
                     }
                 }
 
-                r->start = i + delim_len;
+                r->start = scan + delim_len;
                 return result;
             }
+            scan++;
         }
-
-        if (r->start > 0 && r->start < r->end) {
-            memmove(r->buf, &r->buf[r->start], r->end - r->start);
-            r->end -= r->start;
-            r->start = 0;
-        } else if (r->start == r->end) {
-            r->start = r->end = 0;
-        }
-
-        if (r->end >= r->bufsize) return NULL;
-        ssize_t n = read(r->fd, &r->buf[r->end], r->bufsize - r->end);
-        if (n <= 0) return NULL;
-        r->end += n;
-    }
-}
-
-ssize_t cpr_readbuf(bufio_t *r, char *out, size_t maxlen, const char *delim) {
-    if (!r || !out || maxlen == 0) return -1;
-    if (delim == NULL) delim = "\n";
-    size_t delim_len = strlen(delim);
-    size_t i = r->start;
-    while (1) {
-        // Search for delimiter in buffer
-        for (; i + delim_len <= r->end; ++i) {
-            if (memcmp(&r->buf[i], delim, delim_len) == 0) {
-                size_t len = i - r->start;
-                if (len >= maxlen) return -2; // output buffer too small
-
-                memcpy(out, &r->buf[r->start], len);
-                out[len] = '\0';
-
-                r->start = i + delim_len;
-                return len;
-            }
-        }
-
-        // Shift unread data to front
-        if (r->start > 0 && r->start < r->end) {
-            memmove(r->buf, &r->buf[r->start], r->end - r->start);
-            r->end -= r->start;
-            r->start = 0;
-        } else if (r->start == r->end) {
-            r->start = r->end = 0;
-        }
-
-        // Check for buffer overflow
-        if (r->end == r->bufsize) return -3; // buffer full, no delimiter
-
-        // Read more data
-        ssize_t n = read(r->fd, &r->buf[r->end], r->bufsize - r->end);
-        if (n < 0) return -4; // read error
-        if (n == 0) return 0; // EOF
-
-        r->end += n;
-        i = r->start;
+        if (!cpr_fillbuf(r, 0)) // try in partial mode
+            return NULL;
     }
 }
 

@@ -2,7 +2,7 @@
 # Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
 cmake_minimum_required(VERSION 3.16.0)
-Project(libcpr VERSION 0.3.0 LANGUAGES C)
+Project(libcpr VERSION 0.3.1 LANGUAGES C)
 set(CMAKE_C_STANDARD 17)
 set(C_STANDARD_REQUIRED 17)
 
@@ -43,6 +43,10 @@ add_test(NAME test-tty COMMAND test_tty)
 add_executable(test_memory test/memory.c src/memory.h)
 add_test(NAME test-memory COMMAND test_memory)
 target_link_libraries(test_memory PRIVATE cpr)
+
+add_executable(test_memio test/memio.c src/memio.h)
+add_test(NAME test-memio COMMAND test_memio)
+target_link_libraries(test_memio PRIVATE cpr)
 
 add_executable(test_mempager test/mempager.c src/mempager.h)
 add_test(NAME test-mempager COMMAND test_mempager)

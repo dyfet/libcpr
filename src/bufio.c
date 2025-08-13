@@ -56,7 +56,12 @@ bool cpr_flushbuf(bufio_t *w) {
     if (!w || !w->put) return false;
     char *out = ((char *)w) + sizeof(bufio_t) + w->bufsize;
     ssize_t result = write(w->fd, out, w->put);
-    // TODO: partial saves should do buffer move to front?
+    if ((size_t)result < w->put) {
+        size_t remaining = w->put - (size_t)result;
+        memmove(out, out + result, remaining);
+        w->put = remaining;
+        return false; // partial flush
+    }
     if (result < w->put) return false;
     w->put = 0;
     return true;
@@ -109,6 +114,18 @@ bool cpr_fillbuf(bufio_t *r, size_t request) {
     } else
         r->buf[r->end] = 0; // use null byte, even if full, overflow space
     return true;
+}
+
+const char cpr_cgetbuf(bufio_t *r) {
+    if (!r) return 0;
+    const char *cp = cpr_xgetbuf(r, 1);
+    if (!cp) return 0;
+    return *cp;
+}
+
+bool cpr_cputbuf(bufio_t *r, char ch) {
+    if (!r) return false;
+    return cpr_xputbuf(r, &ch, 1);
 }
 
 const void *cpr_xgetbuf(bufio_t *r, size_t request) {
@@ -167,4 +184,21 @@ int cpr_waitbuf(const bufio_t *r, int timeout_ms) {
             return -4; // poll error
         }
     }
+}
+
+bool cpr_fmtbuf(bufio_t *w, size_t estimated, const char *fmt, ...) {
+    if (!w || !fmt || !estimated || estimated > w->bufsize) return false;
+    char *out = (char *)w + sizeof(bufio_t) + w->bufsize;
+    if (w->put + estimated > w->bufsize) {
+        if (!cpr_flushbuf(w)) return false;
+    }
+
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vsnprintf(&out[w->put], estimated, fmt, ap);
+    va_end(ap);
+
+    if (n < 0 || (size_t)n >= estimated) return false;
+    w->put += (size_t)n;
+    return true;
 }

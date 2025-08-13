@@ -33,12 +33,12 @@ memio_t *cpr_makemem(size_t size) {
     return mem;
 }
 
-char cpr_getmem(memio_t *mem) {
+char cpr_cgetmem(memio_t *mem) {
     if (!mem || mem->get >= mem->size) return 0;
     return mem->data[mem->get++];
 }
 
-bool cpr_putmem(memio_t *mem, char ch) {
+bool cpr_cputmem(memio_t *mem, char ch) {
     if (!mem || mem->put >= mem->size) return false;
     mem->data[mem->put++] = ch;
     return true;
@@ -52,9 +52,23 @@ bool cpr_xputmem(memio_t *mem, const char *from, size_t size) {
 }
 
 bool cpr_sputmem(memio_t *mem, const char *text) {
-    if (!text || !mem) return false;
+    if (!text || !mem || *text == 0) return false;
     // +1 so if string too big it is false...
-    return cpr_xputmem(mem, text, cpr_strlen(text, mem->size + 1));
+    return cpr_xputmem(mem, text, cpr_strlen(text, mem->size));
+}
+
+bool cpr_fmtmem(memio_t *mem, size_t estimated, const char *fmt, ...) {
+    if (!mem || !fmt || !estimated || estimated > mem->size) return false;
+    if (mem->put + estimated > mem->size) return false;
+
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vsnprintf(&mem->data[mem->put], estimated, fmt, ap);
+    va_end(ap);
+
+    if (n < 0 || (size_t)n >= estimated) return false;
+    mem->put += (size_t)n;
+    return true;
 }
 
 const void *cpr_xgetmem(memio_t *mem, size_t size) {

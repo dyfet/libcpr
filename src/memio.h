@@ -22,10 +22,11 @@ typedef struct {
 void cpr_initmem(memio_t *mem, char *from, size_t size);
 void cpr_freemem(memio_t *mem);
 void cpr_resetmem(memio_t *mem);
-char cpr_getmem(memio_t *mem);
-bool cpr_putmem(memio_t *mem, char ch);
+char cpr_cgetmem(memio_t *mem);
+bool cpr_cputmem(memio_t *mem, char ch);
 bool cpr_sputmem(memio_t *mem, const char *text);
 bool cpr_xputmem(memio_t *mem, const char *from, size_t size);
+bool cpr_fmtmem(memio_t *mem, size_t estimated, const char *fmt, ...);
 const char *cpr_lgetmem(memio_t *mem, size_t *out, const char *delim);
 const void *cpr_xgetmem(memio_t *mem, size_t size);
 memio_t *cpr_makemem(size_t size);

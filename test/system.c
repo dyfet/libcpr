@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "../src/system.h"
 #include "../src/pipeline.h"
+#include "../src/waitgroup.h"
 
 int main(int argc, char **argv) {
 }

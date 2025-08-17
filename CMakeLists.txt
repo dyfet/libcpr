@@ -2,7 +2,7 @@
 # Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
 cmake_minimum_required(VERSION 3.16.0)
-Project(libcpr VERSION 0.3.1 LANGUAGES C)
+Project(libcpr VERSION 0.3.2 LANGUAGES C)
 set(CMAKE_C_STANDARD 17)
 set(C_STANDARD_REQUIRED 17)
 

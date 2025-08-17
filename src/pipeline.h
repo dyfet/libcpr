@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
-#ifndef CPR_BUFIO_H
-#define CPR_BUFIO_H
+#ifndef CPR_PIPELINE_H
+#define CPR_PIPELINE_H
 
 #include "clock.h"
 
 typedef struct pipeline {
-    enum { WAIT,
-        DROP } policy;
+    enum {
+        WAIT = 0,
+        DROP
+    } policy;
     mtx_t lock;
     cnd_t input, output;
     size_t head, tail, count, size;

@@ -83,6 +83,12 @@ only header meant as an abstraction layer.
 
 Low level access to and control over posix tty serial devices.
 
+## cpr/waitgroup.h
+
+This is a basic golang-like wait group using C11 threads. The waitgroup is
+useful when synchronizing and avoiding race conditions using detached threads.
+Since pthread supports joinable threads, this may be less used than in go.
+
 ## cpr/wolfssl.h
 
 Some basic low level digest and support functions for using wolfssl.

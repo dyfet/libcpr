@@ -3,7 +3,9 @@
 
 #include "tty.h"
 
-bool cpr_ttyreset(tty_ctx *tty) {
+#include <string.h>
+
+bool tty_reset(tty_ctx *tty) {
     if (!tty || !tty->fd) return -EBADF;
     tty->active.c_oflag = tty->active.c_lflag = 0;
     tty->active.c_cflag = CLOCAL | CREAD | HUPCL;
@@ -17,7 +19,7 @@ bool cpr_ttyreset(tty_ctx *tty) {
     return tcsetattr(tty->fd, TCSANOW, &tty->active) == 0;
 }
 
-bool cpr_inittty(tty_ctx *tty, const char *path) {
+bool tty_init(tty_ctx *tty, const char *path, char echo) {
     if (!tty) return false;
     tty->fd = open(path, O_RDWR | O_NDELAY); // FlawFinder: ignore
     if (tty->fd < 0) return false;
@@ -25,8 +27,9 @@ bool cpr_inittty(tty_ctx *tty, const char *path) {
     long ioflags = fcntl(tty->fd, F_GETFL);
     tcgetattr(tty->fd, &tty->active);
     tcgetattr(tty->fd, &tty->saved);
-    cpr_ttyreset(tty);
+    tty_reset(tty);
     fcntl(tty->fd, F_SETFL, ioflags & ~O_NDELAY);
+    tty->echo = echo;
 
 #if defined(TIOCM_RTS) && defined(TIOCMODG)
     int mcs = 0;
@@ -37,7 +40,7 @@ bool cpr_inittty(tty_ctx *tty, const char *path) {
     return true;
 }
 
-bool cpr_freetty(tty_ctx *tty) {
+bool tty_free(tty_ctx *tty) {
     if (!tty) return false;
     if (tty->fd < 0) return -EBADF;
     tcsetattr(tty->fd, TCSANOW, &tty->saved);
@@ -45,7 +48,7 @@ bool cpr_freetty(tty_ctx *tty) {
     return true;
 }
 
-int cpr_ttycanon(tty_ctx *tty, const char *nl) {
+int tty_canon(tty_ctx *tty, const char *nl) {
     char nl1 = 0, nl2 = 0;
 
     if (!tty || !tty->fd)
@@ -74,7 +77,7 @@ int cpr_ttycanon(tty_ctx *tty, const char *nl) {
 #endif
 }
 
-int cpr_ttypacket(tty_ctx *tty, size_t size, uint8_t timer) {
+int tty_packet(tty_ctx *tty, size_t size, uint8_t timer) {
     if (!tty || !tty->fd)
         return -EBADF;
 
@@ -96,3 +99,40 @@ int cpr_ttypacket(tty_ctx *tty, size_t size, uint8_t timer) {
     return size;
 }
 
+bool tty_putch(tty_ctx *ctx, char ch) {
+    if (!ctx) return false;
+    return write(ctx->fd, &ch, 1) == 1;
+}
+
+char tty_getch(tty_ctx *ctx) {
+    if (!ctx) return 0;
+    char ch;
+    if (read(ctx->fd, &ch, 1) != 1) return 0;
+    if (ctx->echo > 1) {
+        if (!tty_putch(ctx, ctx->echo))
+            return 0;
+    } else if (ctx->echo) {
+        if (!tty_putch(ctx, ch))
+            return 0;
+    }
+    return ch;
+}
+
+ssize_t tty_putline(tty_ctx *ctx, const char *str) {
+    if (!str || !ctx) return -1;
+    return write(ctx->fd, str, strlen(str));
+}
+
+ssize_t tty_getline(tty_ctx *ctx, char *buf, size_t max, char eol) {
+    if (!buf || !ctx || max < 1) return -1;
+    *buf = 0;
+    --max;
+
+    size_t count = 0;
+    while (count < max) {
+        char ch = tty_getch(ctx);
+        if (ch == eol) break;
+        buf[count++] = ch;
+    }
+    return (ssize_t)count;
+}

@@ -21,13 +21,18 @@ extern "C" {
 typedef struct {
     struct termios saved, active;
     int fd;
+    char echo;
 } tty_ctx;
 
-bool cpr_ttyreset(tty_ctx *tty);
-bool cpr_inittty(tty_ctx *tty, const char *path);
-bool cpr_freetty(tty_ctx *tty);
-int cpr_ttycanon(tty_ctx *tty, const char *nl);
-int cpr_ttypacket(tty_ctx *tty, size_t size, uint8_t timer);
+bool tty_reset(tty_ctx *tty);
+bool tty_init(tty_ctx *tty, const char *path, char echo);
+bool tty_free(tty_ctx *tty);
+int tty_canon(tty_ctx *tty, const char *nl);
+int tty_packet(tty_ctx *tty, size_t size, uint8_t timer);
+bool tty_putch(tty_ctx *tty, char ch);
+char tty_getch(tty_ctx *ctx);
+ssize_t tty_putline(tty_ctx *ctx, const char *str);
+ssize_t tty_getline(tty_ctx *ctx, char *buf, size_t max, char eol);
 
 #ifdef __cplusplus
 }

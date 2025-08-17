@@ -26,6 +26,8 @@ const char *get_keyvalue(keysection_t *section, const char *id) {
 
 keydata_t *make_keydata(keysection_t *group, const char *id, const char *value) {
     keydata_t *key = malloc(sizeof(keydata_t));
+    if (!key) return NULL;
+
     key->id = cpr_lower(id, 32);
     key->value = strdup(value);
     ;

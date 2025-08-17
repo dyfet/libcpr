@@ -62,6 +62,7 @@ string_t string_clone(const string_t str) {
         return NULL;
 
     string_t dup = (string_t)malloc(str->size + sizeof(struct _string));
+    if (!dup) return NULL;
     // FlawFinder: ignore
     memcpy(dup, str, str->used + 1 + sizeof(struct _string)); // NOLINT
     return dup;

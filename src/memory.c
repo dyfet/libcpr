@@ -43,6 +43,7 @@ void *cpr_memset(void *ptr, int value, size_t size) {
 
 memshare_t cpr_makeref(size_t size) {
     memshare_t ptr = (memshare_t)malloc(sizeof(struct _memshare) + size);
+    if (!ptr) return NULL;
 #ifndef __STDC_NO_ATOMICS__
     atomic_init(&ptr->refcount, 1);
 #else

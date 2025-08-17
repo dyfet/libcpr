@@ -4,6 +4,7 @@
 #undef  NDEBUG
 #include <assert.h>
 #include "../src/system.h"
+#include "../src/pipeline.h"
 
 int main(int argc, char **argv) {
 }

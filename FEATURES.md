@@ -51,6 +51,12 @@ disposed efficiently all at once.
 
 Access to basic openssl crypto functions, especially common digests.
 
+## cpr/pipeline.h
+
+A pipeline, much like a very simple go channel, to move object ptrs between
+a producer and consumer thread per C11 threading. If drop policy is used then
+dropped packets in the pipleline are also free'd.
+
 ## cpr/socket.h
 
 Basic support to sockets and some convience functions for casting sockaddr and

@@ -33,6 +33,7 @@ void *cpr_new(void **ptr, size_t size);
 void cpr_free(void **ptr);
 void *cpr_memset(void *ptr, int value, size_t size);
 memshare_t cpr_makeref(size_t size);
+bool cpr_memcpy(void *dst, size_t dst_size, const void *src, size_t src_size);
 void *cpr_ref(memshare_t ptr);
 unsigned cpr_count(memshare_t ptr);
 memshare_t cpr_retain(memshare_t ptr);

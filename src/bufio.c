@@ -3,6 +3,7 @@
 
 #include "bufio.h"
 #include "socket.h"
+#include "memory.h"
 
 #include <unistd.h>
 #include <poll.h>
@@ -73,7 +74,7 @@ bool cpr_xputbuf(bufio_t *w, const void *data, size_t request) {
     if (request + w->put > w->bufsize) {
         if (!cpr_flushbuf(w)) return false;
     }
-    memcpy(&out[w->put], data, request);
+    cpr_memcpy(&out[w->put], w->bufsize - w->put, data, request);
     w->put += request;
     return true;
 }
@@ -100,8 +101,8 @@ bool cpr_fillbuf(bufio_t *r, size_t request) {
             r->end -= r->start;
             r->start = 0;
         }
-        // read any extra data to complete request
-        ssize_t n = read(r->fd, &r->buf[r->end], r->bufsize - r->start);
+        // FlawFinder: read any extra data to complete request
+        ssize_t n = read(r->fd, &r->buf[r->end], r->bufsize - r->end);
         if (n > 0) {
             r->end += n;
             r->buf[r->end] = 0;
@@ -139,7 +140,7 @@ const void *cpr_xgetbuf(bufio_t *r, size_t request) {
 const char *cpr_lgetbuf(bufio_t *r, size_t *outlen, const char *delim) {
     if (!r) return NULL;
     if (!delim) delim = "\n";
-    size_t delim_len = strlen(delim);
+    size_t delim_len = cpr_strlen(delim, 16);
     size_t scan = r->start;
     for (;;) {
         while (scan + delim_len <= r->end) {
@@ -195,7 +196,7 @@ bool cpr_fmtbuf(bufio_t *w, size_t estimated, const char *fmt, ...) {
 
     va_list ap;
     va_start(ap, fmt);
-    int n = vsnprintf(&out[w->put], estimated, fmt, ap);
+    int n = vsnprintf(&out[w->put], estimated, fmt, ap); // FlawFinder: checked
     va_end(ap);
 
     if (n < 0 || (size_t)n >= estimated) return false;

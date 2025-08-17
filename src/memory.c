@@ -32,6 +32,13 @@ void cpr_free(void **ptr) {
     *ptr = NULL;
 }
 
+bool cpr_memcpy(void *dst, size_t dst_size, const void *src, size_t src_size) {
+    if (!dst || !src) return false;
+    if (src_size > dst_size) return false;
+    memcpy(dst, src, src_size); // FlawFinder: ignore
+    return true;
+}
+
 void *cpr_memset(void *ptr, int value, size_t size) {
     volatile uint8_t *volatile p = (volatile uint8_t *volatile)ptr;
     if (!p) return NULL;

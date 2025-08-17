@@ -3,6 +3,7 @@
 
 #include "memio.h"
 #include "strchar.h"
+#include "memory.h"
 
 #include <stdlib.h>
 
@@ -46,7 +47,8 @@ bool cpr_cputmem(memio_t *mem, char ch) {
 
 bool cpr_xputmem(memio_t *mem, const char *from, size_t size) {
     if (!mem || (mem->size - mem->put) < size) return false;
-    memcpy(&mem->data[mem->put], from, size);
+    if (!cpr_memcpy(&mem->data[mem->put], mem->size - mem->put, from, size))
+        return false;
     mem->put += size;
     return true;
 }
@@ -63,7 +65,7 @@ bool cpr_fmtmem(memio_t *mem, size_t estimated, const char *fmt, ...) {
 
     va_list ap;
     va_start(ap, fmt);
-    int n = vsnprintf(&mem->data[mem->put], estimated, fmt, ap);
+    int n = vsnprintf(&mem->data[mem->put], estimated, fmt, ap); // FlawFinder: checked
     va_end(ap);
 
     if (n < 0 || (size_t)n >= estimated) return false;
@@ -81,7 +83,7 @@ const void *cpr_xgetmem(memio_t *mem, size_t size) {
 const char *cpr_lgetmem(memio_t *mem, size_t *outlen, const char *delim) {
     if (!mem || mem->get >= mem->size) return NULL;
     if (delim == NULL) delim = "\n";
-    size_t delim_len = strlen(delim);
+    size_t delim_len = cpr_strlen(delim, 16);
     while (1) {
         for (size_t i = mem->get; i + delim_len <= mem->size; ++i) {
             if (memcmp(&mem->data[i], delim, delim_len) == 0) {

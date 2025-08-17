@@ -20,10 +20,12 @@ extern "C" {
 
 typedef struct {
     struct termios saved, active;
-    int fd;
+    int fd, out;
+    int error;
     char echo;
 } tty_ctx;
 
+bool tty_console(tty_ctx *tty, char echo);
 bool tty_reset(tty_ctx *tty);
 bool tty_init(tty_ctx *tty, const char *path, char echo);
 bool tty_free(tty_ctx *tty);

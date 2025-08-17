@@ -2,8 +2,28 @@
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
 #include "tty.h"
+#include "memory.h"
 
-#include <string.h>
+#include <errno.h>
+
+static bool tty_setup(tty_ctx *tty, char echo) {
+    if (!tty) return false;
+    long ioflags = fcntl(tty->fd, F_GETFL);
+    tcgetattr(tty->fd, &tty->active);
+    tcgetattr(tty->fd, &tty->saved);
+    tty_reset(tty);
+    fcntl(tty->fd, F_SETFL, ioflags & ~O_NDELAY);
+    tty->echo = echo;
+    tty->error = 0;
+
+#if defined(TIOCM_RTS) && defined(TIOCMODG)
+    int mcs = 0;
+    ioctl(tty->fd, TIOCMODG, &mcs);
+    mcs |= TIOCM_RTS;
+    ioctl(tty->fd, TIOCMODS, &mcs);
+#endif
+    return true;
+}
 
 bool tty_reset(tty_ctx *tty) {
     if (!tty || !tty->fd) return -EBADF;
@@ -19,32 +39,29 @@ bool tty_reset(tty_ctx *tty) {
     return tcsetattr(tty->fd, TCSANOW, &tty->active) == 0;
 }
 
+bool tty_console(tty_ctx *tty, char echo) {
+    if (!tty || !isatty(0)) return false;
+    tty->fd = 0;
+    if (isatty(1))
+        tty->out = 1;
+    else
+        tty->out = -1;
+    return tty_setup(tty, echo);
+}
+
 bool tty_init(tty_ctx *tty, const char *path, char echo) {
     if (!tty) return false;
-    tty->fd = open(path, O_RDWR | O_NDELAY); // FlawFinder: ignore
+    tty->fd = tty->out = open(path, O_RDWR | O_NDELAY); // FlawFinder: ignore
     if (tty->fd < 0) return false;
-
-    long ioflags = fcntl(tty->fd, F_GETFL);
-    tcgetattr(tty->fd, &tty->active);
-    tcgetattr(tty->fd, &tty->saved);
-    tty_reset(tty);
-    fcntl(tty->fd, F_SETFL, ioflags & ~O_NDELAY);
-    tty->echo = echo;
-
-#if defined(TIOCM_RTS) && defined(TIOCMODG)
-    int mcs = 0;
-    ioctl(tty->fd, TIOCMODG, &mcs);
-    mcs |= TIOCM_RTS;
-    ioctl(tty->fd, TIOCMODS, &mcs);
-#endif
-    return true;
+    return tty_setup(tty, echo);
 }
 
 bool tty_free(tty_ctx *tty) {
     if (!tty) return false;
     if (tty->fd < 0) return -EBADF;
     tcsetattr(tty->fd, TCSANOW, &tty->saved);
-    close(tty->fd);
+    if (tty->fd > 2)
+        close(tty->fd);
     return true;
 }
 
@@ -101,14 +118,20 @@ int tty_packet(tty_ctx *tty, size_t size, uint8_t timer) {
 
 bool tty_putch(tty_ctx *ctx, char ch) {
     if (!ctx) return false;
-    return write(ctx->fd, &ch, 1) == 1;
+    ctx->error = 0;
+    int rtn = write(ctx->out, &ch, 1);
+    if (rtn < 0) ctx->error = errno;
+    return rtn == 1;
 }
 
 char tty_getch(tty_ctx *ctx) {
     if (!ctx) return 0;
+    ctx->error = 0;
     char ch;
-    if (read(ctx->fd, &ch, 1) != 1) return 0;
-    if (ctx->echo > 1) {
+    int rtn = read(ctx->fd, &ch, 1); // FlawFinder: valid
+    if (rtn < 0) ctx->error = errno;
+    if (rtn != 1) return 0;
+    if (ctx->echo > 1 && ch > 31 && ch != 127) {
         if (!tty_putch(ctx, ctx->echo))
             return 0;
     } else if (ctx->echo) {
@@ -120,7 +143,10 @@ char tty_getch(tty_ctx *ctx) {
 
 ssize_t tty_putline(tty_ctx *ctx, const char *str) {
     if (!str || !ctx) return -1;
-    return write(ctx->fd, str, strlen(str));
+    ctx->error = 0;
+    int rtn = write(ctx->out, str, cpr_strlen(str, 256));
+    if (rtn < 0) ctx->error = errno;
+    return rtn;
 }
 
 ssize_t tty_getline(tty_ctx *ctx, char *buf, size_t max, char eol) {
@@ -131,7 +157,7 @@ ssize_t tty_getline(tty_ctx *ctx, char *buf, size_t max, char eol) {
     size_t count = 0;
     while (count < max) {
         char ch = tty_getch(ctx);
-        if (ch == eol) break;
+        if (ch == 0 || ch == eol) break;
         buf[count++] = ch;
     }
     return (ssize_t)count;

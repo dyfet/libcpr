@@ -65,6 +65,25 @@ time_t cpr_time(const cpr_timepoint_t mono) {
     return mono->tv_sec + offset;
 }
 
+void cpr_elapsed(const cpr_timepoint_t from, cpr_duration_t since) {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+
+    since->tv_sec = now.tv_sec - from->tv_sec;
+    since->tv_nsec = now.tv_nsec - from->tv_nsec;
+
+    if (since->tv_nsec < 0) {
+        since->tv_nsec += 1000000000;
+        since->tv_sec -= 1;
+    }
+
+    if (since->tv_sec < 0 || (since->tv_sec == 0 && since->tv_nsec <= 0)) {
+        since->tv_sec = 0;
+        since->tv_nsec = 0;
+        return;
+    }
+}
+
 bool cpr_remains(const cpr_timepoint_t mono, cpr_duration_t rel) {
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);

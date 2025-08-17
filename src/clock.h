@@ -22,6 +22,7 @@ bool cpr_gettime(cpr_timepoint_t ts);
 void cpr_addmsec(cpr_timepoint_t ts, long ms);
 bool cpr_remains(const cpr_timepoint_t mono, cpr_duration_t rel);
 int cpr_expires(const cpr_timepoint_t deadline, struct timeval *tv);
+void cpr_elapsed(const cpr_timepoint_t from, cpr_duration_t since);
 time_t cpr_time(const cpr_timepoint_t mono);
 
 inline static void cpr_condinit(pthread_cond_t *cond) {

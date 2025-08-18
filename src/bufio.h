@@ -4,7 +4,7 @@
 #ifndef CPR_BUFIO_H
 #define CPR_BUFIO_H
 
-#include "string.h"
+#include "strchar.h"
 
 #include <termios.h>
 

@@ -22,11 +22,7 @@ support. The minimum requirement is a C17 compiler (or later).
 
 ## Dependencies
 
-Libcpr and applications may make use of the C11 threading and atomics support.
-Libcpr also may use openssl or wolfssl for crypto operations and any crypto
-related headers. Generally it should only require libcrypto from openssl. All
-uses of openssl are restricted to the openssl.h header, and it is suggested
-that if there are licensing concerns, wolfssl may be a better choice.
+Libcpr applications may make use of C11 threading and atomics support.
 
 ## Distributions
 
@@ -49,13 +45,6 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
-
-NOTE: As primarily a header based library where functional code residing in
-headers that are either directly called or instancianted and called by user
-applications, it is strongly believed any use of this library constitutes and
-efffectively produces a derivitive or combined work, per the GPL, and this is
-intentional. As the sole copyright holder I can also offer other forms of
-commercial licensing under different tterms.
 
 ## Participation
 

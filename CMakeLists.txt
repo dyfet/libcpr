@@ -73,18 +73,6 @@ set_target_properties(test_keyfile PROPERTIES COMPILE_DEFINITIONS "TEST_DATA=\"$
 target_link_libraries(test_keyfile PRIVATE cpr)
 add_test(NAME test-keyfile COMMAND test_keyfile)
 
-if(OPENSSL_FOUND)
-add_executable(test_openssl  test/openssl.c src/openssl.h)
-target_link_libraries(test_openssl PRIVATE OpenSSL::Crypto)
-add_test(NAME test-openssl COMMAND test_openssl)
-endif()
-
-if(WOLFSSL_FOUND)
-add_executable(test_wolfssl  test/wolfssl.c src/wolfssl.h)
-target_link_libraries(test_wolfssl PRIVATE ${WOLFSSL_LIBRARIES})
-add_test(NAME test-wolfssl COMMAND test_wolfssl)
-endif()
-
 # Extras...
 add_custom_target(header-files SOURCES ${headers})
 add_custom_target(support-files SOURCES ${markdown} ${optional})

@@ -17,9 +17,6 @@ if(WIN32)
     endif()
 endif()
 
-find_package(OpenSSL)
-pkg_check_modules(WOLFSSL wolfssl)
-
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(BUILD_DEBUG true)
     add_definitions(-DDEBUG)

@@ -47,10 +47,6 @@ threads.
 This provides a pager memory allocation system to create micro-heaps that can be
 disposed efficiently all at once.
 
-## cpr/openssl.h
-
-Access to basic openssl crypto functions, especially common digests.
-
 ## cpr/pipeline.h
 
 A pipeline, much like a very simple go channel, to move object ptrs between
@@ -88,8 +84,4 @@ Low level access to and control over posix tty serial devices.
 This is a basic golang-like wait group using C11 threads. The waitgroup is
 useful when synchronizing and avoiding race conditions using detached threads.
 Since pthread supports joinable threads, this may be less used than in go.
-
-## cpr/wolfssl.h
-
-Some basic low level digest and support functions for using wolfssl.
 

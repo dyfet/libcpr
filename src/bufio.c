@@ -20,7 +20,8 @@ void cpr_freebuf(bufio_t *r) {
         struct stat ino;
         if (!fstat(r->fd, &ino) && S_ISSOCK(ino.st_mode))
             shutdown(r->fd, SHUT_RDWR);
-        close(r->fd);
+        if (r->fd > 2)
+            close(r->fd);
     }
     free(r);
 }

@@ -8,13 +8,13 @@ Runtime".
 
 One goal for CPR is to have minimal abstraction layers above C and the core
 libc. There is a linkable library built for efficiency, but it has a very small
-footprint. Static inlines are used to also limit what gets built or linked in
-executables. The goal is to keep it small, simple, safe, and convient for
+footprint. Static inline is used to also limit what gets built or linked in
+executables. The goal is to keep it small, simple, safe, and convenient for
 building system applications written in pure C.
 
 Libcpr requires CMake and any modern C compiler to build it. Some C
 applications may require the C11 threads library and so cannot be built on
-Windows sytems. Otherise it should build and work with GCC (9 or later), with
+Windows systems. Otherwise it should build and work with GCC (9 or later), with
 Clang (14? or later), and perhaps even with MSVC. Besides GNU/Linux and BSD
 systems, libcpr is portable to and can support the MingW platform target as
 installed by Debian when selecting posix runtime, and this offers thread

@@ -95,7 +95,7 @@ bool cpr_fillbuf(bufio_t *r, size_t request) {
         request = r->bufsize;
         refill = true;
     }
-    // if we don't have enouigh data...
+    // if we don't have enough data...
     if (remains < request) { // see if we need to move
         if (avail < request && r->start < r->end) {
             memmove(r->buf, &r->buf[r->start], r->end - r->start);

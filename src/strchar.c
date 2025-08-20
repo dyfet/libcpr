@@ -233,7 +233,6 @@ char *cpr_strtrim(char *str, const char *list, size_t max) {
             break;
         ++str;
     }
-    *str = 0;
     return str;
 }
 

@@ -11,5 +11,8 @@ int main(int argc, char **argv) {
     assert(cpr_strlen("hellohere", 5) == 5);
     assert(cpr_strlen(NULL, 80) == 0);
     assert(eq("ell", cpr_strdup(hello + 1, 3)));  // NOLINT
+
+    char *untrimmed = "  hello";
+    assert(eq(cpr_strtrim(untrimmed, " ", 16), "hello"));
 }
 

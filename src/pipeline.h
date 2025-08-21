@@ -6,6 +6,8 @@
 
 #include "clock.h"
 
+#include <stdatomic.h>
+
 typedef struct pipeline {
     enum {
         WAIT = 0,
@@ -14,11 +16,13 @@ typedef struct pipeline {
     mtx_t lock;
     cnd_t input, output;
     size_t head, tail, count, size;
+    atomic_bool closed;
     void *buf[];
 } pipeline_t;
 
 pipeline_t *make_pipeline(size_t size, int policy);
+void close_pipeline(pipeline_t *pl);
 void free_pipeline(pipeline_t *pl);
 void *get_pipeline(pipeline_t *pl);
-void put_pipeline(pipeline_t *pl, void *ptr);
+bool put_pipeline(pipeline_t *pl, void *ptr);
 #endif

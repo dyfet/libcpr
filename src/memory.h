@@ -9,10 +9,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
-
-#ifndef __STDC_NO_ATOMICS__
 #include <stdatomic.h>
-#endif
 
 #include "strchar.h"
 
@@ -21,11 +18,7 @@ extern "C" {
 #endif
 
 typedef struct _memshare {
-#ifndef __STDC_NO_ATOMICS__
     atomic_uint refcount;
-#else
-    unsigned refcount;
-#endif
 } *memshare_t;
 
 char *cpr_hexdup(const uint8_t *bin, size_t size);

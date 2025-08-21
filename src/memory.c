@@ -51,11 +51,7 @@ void *cpr_memset(void *ptr, int value, size_t size) {
 memshare_t cpr_makeref(size_t size) {
     memshare_t ptr = (memshare_t)malloc(sizeof(struct _memshare) + size);
     if (!ptr) return NULL;
-#ifndef __STDC_NO_ATOMICS__
     atomic_init(&ptr->refcount, 1);
-#else
-    ptr->refcount = 1;
-#endif
     return ptr;
 }
 
@@ -64,33 +60,18 @@ void *cpr_ref(memshare_t ptr) {
 }
 
 unsigned cpr_count(memshare_t ptr) {
-#ifndef __STDC_NO_ATOMICS__
     return atomic_load(&ptr->refcount);
-#else
-    return ptr->refcount;
-#endif
 }
 
 memshare_t cpr_retain(memshare_t ptr) {
-#ifndef __STDC_NO_ATOMICS__
     atomic_fetch_add(&ptr->refcount, 1);
-#else
-    ++ptr->refcount;
-#endif
     return ptr;
 }
 
 memshare_t cpr_release(memshare_t ptr) {
-#ifndef __STDC_NO_ATOMICS__
     if (atomic_fetch_sub(&ptr->refcount, 1) == 1) {
         free(ptr);
         return NULL;
     }
-#else
-    if (!--ptr->refcount) {
-        free(ptr);
-        return NULL;
-    }
-#endif
     return ptr;
 }

@@ -6,7 +6,19 @@
 #include "../src/system.h"
 #include "../src/pipeline.h"
 #include "../src/waitgroup.h"
+#include "../src/events.h"
+
+static void test_events() {
+    event_t evt;
+    assert(cpr_initevt(&evt) == true);
+    assert(cpr_waitevt(&evt, 0) == false);
+    assert(cpr_setevt(&evt) == true);
+    assert(cpr_waitevt(&evt, 0) == true);
+    assert(cpr_clearevt(&evt) == true);
+    cpr_freeevt(&evt);
+}
 
 int main(int argc, char **argv) {
+    test_events();
 }
 

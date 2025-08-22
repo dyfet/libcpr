@@ -54,6 +54,7 @@ target_link_libraries(test_mempager PRIVATE cpr)
 
 add_executable(test_system test/system.c src/system.h)
 add_test(NAME test-system COMMAND test_system)
+target_link_libraries(test_system PRIVATE cpr)
 
 add_executable(test_string test/string.c src/string.h)
 add_test(NAME test-string COMMAND test_string)

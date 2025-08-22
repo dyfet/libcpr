@@ -5,15 +5,17 @@
 
 #include <stdlib.h>
 
-pipeline_t *make_pipeline(size_t size, int policy) {
+pipeline_t *make_pipeline(size_t size, int policy, void (*ff)(void *)) {
     pipeline_t *pl = malloc(sizeof(pipeline_t) + (size * sizeof(void *)));
     if (!pl) return NULL;
+    if (ff == NULL) ff = &free;
     mtx_init(&pl->lock, mtx_plain);
     cnd_init(&pl->input);
     cnd_init(&pl->output);
     pl->head = pl->tail = pl->count = 0;
     pl->size = size;
     pl->policy = policy;
+    pl->free = ff;
     atomic_init(&pl->closed, false);
     return pl;
 }
@@ -29,14 +31,14 @@ void free_pipeline(pipeline_t *pl) {
 
 void close_pipeline(pipeline_t *pl) {
     if (!pl) return;
-    if(atomic_exchange(&pl->closed, true)) return;
+    if (atomic_exchange(&pl->closed, true)) return;
     cnd_broadcast(&pl->input);
     cnd_broadcast(&pl->output);
     thrd_yield();
     mtx_lock(&pl->lock);
     while (pl->count) {
         void *out = pl->buf[pl->head];
-        if(out) free(out);
+        if (out) pl->free(out);
         pl->head = (pl->head + 1) % pl->size;
         --pl->count;
     }
@@ -61,6 +63,11 @@ void *get_pipeline(pipeline_t *pl) {
     return NULL;
 }
 
+bool is_pipeline(pipeline_t *pl) {
+    if (!pl) return false;
+    return !atomic_load(&pl->closed);
+}
+
 bool put_pipeline(pipeline_t *pl, void *ptr) {
     if (!pl) return false;
     mtx_lock(&pl->lock);
@@ -78,7 +85,7 @@ bool put_pipeline(pipeline_t *pl, void *ptr) {
         else {
             void *drop = pl->buf[pl->head];
             if (drop)
-                free(drop);
+                pl->free(drop);
             pl->head = (pl->head + 1) % pl->size;
             --pl->count;
         }

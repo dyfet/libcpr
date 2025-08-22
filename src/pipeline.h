@@ -17,12 +17,14 @@ typedef struct pipeline {
     cnd_t input, output;
     size_t head, tail, count, size;
     atomic_bool closed;
+    void (*free)(void *);
     void *buf[];
 } pipeline_t;
 
-pipeline_t *make_pipeline(size_t size, int policy);
+pipeline_t *make_pipeline(size_t size, int policy, void (*ff)(void *));
 void close_pipeline(pipeline_t *pl);
 void free_pipeline(pipeline_t *pl);
 void *get_pipeline(pipeline_t *pl);
 bool put_pipeline(pipeline_t *pl, void *ptr);
+bool is_pipeline(pipeline_t *pl);
 #endif

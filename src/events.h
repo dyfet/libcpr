@@ -4,6 +4,7 @@
 #ifndef CPR_EVENTS_H
 #define CPR_EVENTS_H
 
+#ifndef _WIN32
 #include <stdbool.h>
 
 typedef struct {
@@ -16,4 +17,5 @@ bool cpr_setevt(event_t *evt);
 bool cpr_clearevt(event_t *evt);
 bool cpr_waitevt(event_t *evt, int timeout);
 
+#endif
 #endif

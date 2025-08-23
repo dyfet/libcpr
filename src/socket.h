@@ -4,6 +4,7 @@
 #ifndef CPR_SOCKET_H
 #define CPR_SOCKET_H
 
+#ifndef _WIN32
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -57,5 +58,6 @@ inline static const struct sockaddr_in6 *to_in6(const struct sockaddr *addr) {
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

@@ -6,7 +6,9 @@
 
 #include "strchar.h"
 
+#ifndef _WIN32
 #include <termios.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,7 +16,9 @@ extern "C" {
 
 typedef struct {
     int fd;
+#ifndef _WIN32
     struct termios tty;
+#endif
     size_t bufsize;
     size_t start;
     size_t end;

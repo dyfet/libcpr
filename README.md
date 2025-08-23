@@ -13,8 +13,8 @@ executables. The goal is to keep it small, simple, safe, and convenient for
 building system applications written in pure C.
 
 Libcpr requires CMake and any modern C compiler to build it. Some C
-applications may require the C11 threads library and so cannot be built on
-Windows systems. Otherwise it should build and work with GCC (9 or later), with
+applications may require the C11 threads library. I have a partial wrapper for
+MingW32 pthread support. It should build and work with GCC (9 or later), with
 Clang (14? or later), and perhaps even with MSVC. Besides GNU/Linux and BSD
 systems, libcpr is portable to and can support the MingW platform target as
 installed by Debian when selecting posix runtime, and this offers thread

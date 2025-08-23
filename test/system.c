@@ -9,6 +9,7 @@
 #include "../src/events.h"
 
 static void test_events() {
+#ifndef _WIN32
     event_t evt;
     assert(cpr_initevt(&evt) == true);
     assert(cpr_waitevt(&evt, 0) == false);
@@ -16,6 +17,7 @@ static void test_events() {
     assert(cpr_waitevt(&evt, 0) == true);
     assert(cpr_clearevt(&evt) == true);
     cpr_freeevt(&evt);
+#endif
 }
 
 int main(int argc, char **argv) {

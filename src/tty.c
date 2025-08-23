@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
+#ifndef _WIN32
 #include "tty.h"
 #include "memory.h"
 
@@ -162,3 +163,4 @@ ssize_t tty_getline(tty_ctx *ctx, char *buf, size_t max, char eol) {
     }
     return (ssize_t)count;
 }
+#endif

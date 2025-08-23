@@ -5,6 +5,11 @@ files with inline static functions and simple C pre-processor macros that
 typically are installed under and included from /usr/include/cpr. These
 currently include:
 
+MOTE: While this library does now build on Microsoft Windows using MingW32 with
+the pthread target, some features and functionality may still be limited or
+disabled for that platform. As it depends on MingW32 unistd.h support it
+probably cannot be built on windows with MSVC at all.
+
 ## cpr/bufio.h
 
 Basic full duplex low level zero copy stream buffered I/O access to low

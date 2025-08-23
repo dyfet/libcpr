@@ -4,9 +4,10 @@
 #ifndef CPR_CLOCK_H
 #define CPR_CLOCK_H
 
+#include "threads.h"
+
 #include <stdbool.h>
 #include <pthread.h>
-#include <threads.h>
 #include <time.h>
 #include <sys/time.h>
 

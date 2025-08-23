@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
+#ifndef _WIN32
 #include "socket.h"
 
 #include <string.h>
@@ -67,3 +68,4 @@ int cpr_drop(int so, const struct sockaddr *member, unsigned ifindex) {
     }
     return res;
 }
+#endif

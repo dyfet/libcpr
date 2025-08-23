@@ -6,20 +6,31 @@
 #include "memory.h"
 
 #include <unistd.h>
+#ifndef _WIN32
 #include <poll.h>
+#endif
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/stat.h>
 
 void cpr_freebuf(bufio_t *r) {
     cpr_flushbuf(r);
+
+#ifndef _WIN32
     if (r->fd > -1 && isatty(r->fd)) {
         tcdrain(r->fd);
         tcsetattr(r->fd, TCSANOW, &r->tty);
-    } else if (r->fd > -1) {
+        free(r);
+        return;
+    }
+#endif
+
+    if (r->fd > -1) {
         struct stat ino;
+#ifndef _WIN32
         if (!fstat(r->fd, &ino) && S_ISSOCK(ino.st_mode))
             shutdown(r->fd, SHUT_RDWR);
+#endif
         if (r->fd > 2)
             close(r->fd);
     }
@@ -30,6 +41,7 @@ bufio_t *cpr_makebuf(int fd, size_t bufsize) {
     if (fd < 0 || !bufsize) return NULL;
     bufio_t *r = malloc(sizeof(bufio_t) + (bufsize * 2));
     if (!r) return NULL;
+#ifndef _WIN32
     if (isatty(fd)) {
         struct termios t;
         if (tcgetattr(fd, &r->tty) < 0) {
@@ -47,6 +59,7 @@ bufio_t *cpr_makebuf(int fd, size_t bufsize) {
             return NULL;
         }
     }
+#endif
 
     r->fd = fd;
     r->bufsize = bufsize;
@@ -166,6 +179,7 @@ const char *cpr_lgetbuf(bufio_t *r, size_t *outlen, const char *delim) {
     }
 }
 
+#ifndef _WIN32
 int cpr_waitbuf(const bufio_t *r, int timeout_ms) {
     if (!r || r->fd < 0) return -1;
     struct pollfd pfd = {
@@ -187,6 +201,7 @@ int cpr_waitbuf(const bufio_t *r, int timeout_ms) {
         }
     }
 }
+#endif
 
 bool cpr_fmtbuf(bufio_t *w, size_t estimated, const char *fmt, ...) {
     if (!w || !fmt || !estimated || estimated > w->bufsize) return false;

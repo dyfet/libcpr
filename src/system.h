@@ -9,8 +9,9 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__) || defined(WIN32)
+#if defined(__MINGW32__) || defined(__MINGW64__) || defined(WIN32)
 #define MICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS 0
 #define WINDOWS_SYSTEM
 #include <windows.h>
@@ -20,15 +21,7 @@
 #include <fileapi.h>
 #include <stdio.h>
 #include <string.h>
-#endif
-
-#ifndef _MSC_VER
-#include <unistd.h>
 #include <dirent.h>
-#include <getopt.h>
-#else
-#include <BaseTsd.h>
-typedef SSIZE_T ssize_t;
 #endif
 
 #if defined(__OpenBSD__)

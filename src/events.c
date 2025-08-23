@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
+#ifndef _WIN32
 #include "events.h"
 
 #include <stdlib.h>
@@ -77,3 +78,4 @@ bool cpr_waitevt(event_t *evt, int timeout) {
     }
     return rtn > 0;
 }
+#endif

@@ -4,6 +4,7 @@
 #ifndef CPR_TTY_H
 #define CPR_TTY_H
 
+#ifndef _WIN32
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -38,5 +39,6 @@ ssize_t tty_getline(tty_ctx *ctx, char *buf, size_t max, char eol);
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

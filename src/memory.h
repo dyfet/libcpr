@@ -32,6 +32,7 @@ unsigned cpr_count(memshare_t ptr);
 memshare_t cpr_retain(memshare_t ptr);
 memshare_t cpr_release(memshare_t ptr);
 
+#ifndef _WIN32
 static inline FILE *cpr_memread(const void *from, size_t size) {
     if (!from || size == 0) return NULL;
     return fmemopen((void *)from, size, "r");
@@ -48,6 +49,7 @@ static inline FILE *cpr_memstring(const char *text, size_t max) {
     if (!max) return NULL;
     return fmemopen((void *)text, max, "r");
 }
+#endif
 
 #define NEWP(ptr, T) (T *)cpr_new((void **)&ptr, sizeof(T))
 #define FREEP(ptr) cpr_free((void **)&ptr)

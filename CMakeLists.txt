@@ -2,7 +2,7 @@
 # Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
 cmake_minimum_required(VERSION 3.16.0)
-Project(libcpr VERSION 0.3.4 LANGUAGES C)
+Project(libcpr VERSION 0.4.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 17)
 set(C_STANDARD_REQUIRED 17)
 
@@ -35,10 +35,16 @@ if(BUILD_SHARED_LIBS AND CMAKE_BUILD_TYPE MATCHES "^Rel")
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+    target_compile_options(cpr PUBLIC -pthread)
+    target_link_options(cpr PUBLIC -pthread)
+endif()
+
 # testing
 
 add_executable(test_tty test/tty.c src/tty.h)
 add_test(NAME test-tty COMMAND test_tty)
+target_link_libraries(test_tty PRIVATE cpr)
 
 add_executable(test_memory test/memory.c src/memory.h)
 add_test(NAME test-memory COMMAND test_memory)
@@ -68,6 +74,10 @@ add_test(NAME test-socket COMMAND test_socket)
 
 add_executable(test_clock test/clock.c src/clock.h)
 add_test(NAME test-clock COMMAND test_clock)
+
+add_executable(test_thread test/thread.c src/thread.h)
+add_test(NAME test-thread COMMAND test_thread)
+target_link_libraries(test_thread PRIVATE cpr)
 
 add_executable(test_keyfile test/keyfile.c src/keyfile.h)
 set_target_properties(test_keyfile PROPERTIES COMPILE_DEFINITIONS "TEST_DATA=\"${CMAKE_SOURCE_DIR}/test\"")

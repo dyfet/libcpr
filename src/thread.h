@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
-#ifndef CPR_HTREADS_H
-#define CPR_THREADS_H
+#ifndef CPR_THREAD_H
+#define CPR_THREAD_H
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__FreeBSD__)
 #include <pthread.h>
 #include <stdlib.h>
 #include <errno.h>

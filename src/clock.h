@@ -4,7 +4,7 @@
 #ifndef CPR_CLOCK_H
 #define CPR_CLOCK_H
 
-#include "threads.h"
+#include "thread.h"
 
 #include <stdbool.h>
 #include <pthread.h>

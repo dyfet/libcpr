@@ -30,6 +30,7 @@ bufio_t *cpr_makebuf(int fd, size_t bufsize);
 const char *cpr_lgetbuf(bufio_t *r, size_t *outlen, const char *delim);
 const void *cpr_xgetbuf(bufio_t *r, size_t request);
 const char cpr_cgetbuf(bufio_t *r);
+bool clr_resetbuf(bufio_t *r, size_t consume);
 bool cpr_fillbuf(bufio_t *r, size_t request);
 bool cpr_flushbuf(bufio_t *w);
 bool cpr_cputbuf(bufio_t *w, char ch);

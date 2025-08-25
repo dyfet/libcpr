@@ -67,6 +67,23 @@ bufio_t *cpr_makebuf(int fd, size_t bufsize) {
     return r;
 }
 
+bool cpr_resetbuf(bufio_t *r, size_t consume) {
+    if (!r || consume > r->bufsize) return false;
+    if (r->start + consume <= r->end)
+        r->start += consume;
+    else
+        return false;
+    size_t remains = r->end - r->start;
+    if (r->start > 0 && remains)
+        memmove(r->buf, &r->buf[r->start], remains);
+    r->start = 0;
+    r->end = remains;
+    if (remains < r->bufsize)
+        return cpr_fillbuf(r, r->bufsize - remains);
+    else
+        return true;
+}
+
 bool cpr_flushbuf(bufio_t *w) {
     if (!w || !w->put) return false;
     char *out = ((char *)w) + sizeof(bufio_t) + w->bufsize;

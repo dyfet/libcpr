@@ -56,10 +56,10 @@ bool cpr_clearevt(event_t *evt) {
     if (!evt || evt->fds[0] == -1) return false;
 #ifdef EFD_NONBLOCK
     uint64_t count;
-    int rtn = read(evt->fds[0], &count, sizeof(count));
+    int rtn = read(evt->fds[0], &count, sizeof(count)); // FlawFinder: ok
 #else
     char buf[64];
-    int rtn = read(evt->fds[0], buf, sizeof(buf)); // drain pending signals
+    int rtn = read(evt->fds[0], buf, sizeof(buf)); // FlawFinder: ok
 #endif
     if (rtn < 0) {
         cpr_freeevt(evt);

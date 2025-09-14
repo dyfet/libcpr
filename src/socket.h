@@ -39,6 +39,7 @@ typedef union {
 int cpr_join(int so, const struct sockaddr *member, unsigned ifindex);
 int cpr_drop(int so, const struct sockaddr *member, unsigned ifindex);
 socklen_t cpr_socklen(const struct sockaddr *addr);
+void cpr_sockclose(int so);
 
 inline static struct sockaddr *to_sockaddr(struct sockaddr_storage *storage) {
     return (struct sockaddr *)storage;

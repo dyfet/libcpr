@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <unistd.h>
 
 #if defined(__MINGW32__) || defined(__MINGW64__) || defined(WIN32)
@@ -21,7 +22,6 @@
 #include <fileapi.h>
 #include <stdio.h>
 #include <string.h>
-#include <dirent.h>
 #endif
 
 #if defined(__OpenBSD__)

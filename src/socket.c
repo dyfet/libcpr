@@ -6,6 +6,12 @@
 
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
+
+void cpr_sockclose(int so) {
+    shutdown(so, SHUT_RDWR);
+    close(so);
+}
 
 socklen_t cpr_socklen(const struct sockaddr *addr) {
     if (!addr) return 0;

@@ -3,6 +3,8 @@
 
 #include "clock.h"
 
+#include <errno.h>
+
 bool cpr_gettime(cpr_timepoint_t ts) {
     return (clock_gettime(CLOCK_MONOTONIC, ts) != 0) ? false : true;
 }
@@ -104,3 +106,24 @@ bool cpr_remains(const cpr_timepoint_t mono, cpr_duration_t rel) {
     }
     return true;
 }
+
+void cpr_monoinit(cpr_monocond_t *cond) {
+    pthread_condattr_t attr;
+    pthread_condattr_init(&attr);
+    pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
+    pthread_cond_init(cond, &attr);
+    pthread_condattr_destroy(&attr);
+}
+
+int cpr_monotimed(cpr_monocond_t *cond, mtx_t *mtx, cpr_timepoint_t tp) {
+    return pthread_cond_timedwait(cond, (pthread_mutex_t*)mtx, tp);
+}
+
+int cpr_monosleep(pthread_cond_t *cond, mtx_t *mtx, cpr_timepoint_t tp) {
+    int rc;
+    do {
+        rc = pthread_cond_timedwait(cond, (pthread_mutex_t*)mtx, tp);
+    } while (rc == 0);
+    return rc == ETIMEDOUT ? 0 : rc;
+}
+

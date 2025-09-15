@@ -4,13 +4,14 @@
 #ifndef CPR_SOCKET_H
 #define CPR_SOCKET_H
 
-#ifndef _WIN32
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <sys/types.h>
-#include <fcntl.h>
+#ifdef _WIN32
+#include "system.h"
+typedef int socklen_t;
+#else
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netinet/in.h>
@@ -20,26 +21,16 @@ extern "C" {
 #include <arpa/inet.h>
 #include <poll.h>
 #include <ifaddrs.h>
-
-#ifndef IPV6_ADD_MEMBERSHIP
-#define IPV6_ADD_MEMBERSHIP IP_ADD_MEMBERSHIP
 #endif
 
-#ifndef IPV6_DROP_MEMBERSHIP
-#define IPV6_DROP_MEMBERSHIP IP_DROP_MEMBERSHIP
-#endif
-
-typedef union {
-    struct ip_mreq ipv4;
-    struct ipv6_mreq ipv6;
-} multicast_t;
+#include <sys/types.h>
+#include <fcntl.h>
 
 // socket casting types
 
-int cpr_join(int so, const struct sockaddr *member, unsigned ifindex);
-int cpr_drop(int so, const struct sockaddr *member, unsigned ifindex);
 socklen_t cpr_socklen(const struct sockaddr *addr);
 void cpr_sockclose(int so);
+int cpr_sockinit();
 
 inline static struct sockaddr *to_sockaddr(struct sockaddr_storage *storage) {
     return (struct sockaddr *)storage;
@@ -59,6 +50,5 @@ inline static const struct sockaddr_in6 *to_in6(const struct sockaddr *addr) {
 
 #ifdef __cplusplus
 }
-#endif
 #endif
 #endif

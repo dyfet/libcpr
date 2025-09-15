@@ -15,7 +15,10 @@
 #if defined(__MINGW32__) || defined(__MINGW64__) || defined(WIN32)
 #define MICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS 0
 #define WINDOWS_SYSTEM
+#include <winsock2.h>
 #include <windows.h>
+#include <ws2tcpip.h>
+#include <tlhelp32.h>
 #include <io.h>
 #include <direct.h>
 #include <winioctl.h>

@@ -18,6 +18,7 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
+#include <iphlpapi.h>
 #include <tlhelp32.h>
 #include <io.h>
 #include <direct.h>

@@ -21,6 +21,8 @@ typedef int socklen_t;
 #include <arpa/inet.h>
 #include <poll.h>
 #include <ifaddrs.h>
+
+typedef struct ifaddrs *iface_t;
 #endif
 
 #include <sys/types.h>

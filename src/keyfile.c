@@ -117,3 +117,21 @@ keysection_t *load_keyfile(const char *path) {
     fclose(fp); // NOLINT
     return root;
 }
+
+bool save_keyfile(const char *path, keysection_t *root) {
+    if (!path || !root) return false;
+    remove(path);
+    FILE *fp = fopen(path, "w");
+    if (!fp) return false;
+    for (keysection_t *section = root; section != NULL; section = section->next) {
+        fprintf(fp, "[%s]\n", section->id);
+        for (keydata_t *key = section->keys; key != NULL; key = key->next) {
+            if (strchr(key->value, '\'') != NULL)
+                fprintf(fp, "%s=\"%s\"\n", key->id, key->value);
+            else
+                fprintf(fp, "%s='%s'\n", key->id, key->value);
+        }
+    }
+    fclose(fp);
+    return true;
+}

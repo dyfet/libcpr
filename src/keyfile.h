@@ -32,6 +32,7 @@ keysection_t *find_keysection(keysection_t *root, const char *id);
 keysection_t *load_keyfile(const char *path);
 keydata_t *make_keydata(keysection_t *group, const char *id, const char *value);
 const char *get_keyvalue(keysection_t *section, const char *id);
+bool save_keyfile(const char *path, keysection_t *root);
 
 #ifdef __cplusplus
 }

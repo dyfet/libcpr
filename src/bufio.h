@@ -16,7 +16,9 @@ extern "C" {
 
 typedef struct {
     int fd;
-#ifndef _WIN32
+#ifdef _WIN32
+    bool socket;
+#else
     struct termios tty;
 #endif
     size_t bufsize;
@@ -26,6 +28,7 @@ typedef struct {
     char buf[2]; // extra byte to zero end of buf in fetch
 } bufio_t;
 
+bufio_t *cpr_sockbuf(int so, size_t bufsize);
 bufio_t *cpr_makebuf(int fd, size_t bufsize);
 const char *cpr_lgetbuf(bufio_t *r, size_t *outlen, const char *delim);
 const void *cpr_xgetbuf(bufio_t *r, size_t request);

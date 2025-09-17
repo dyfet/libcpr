@@ -116,14 +116,13 @@ void cpr_monoinit(cpr_monocond_t *cond) {
 }
 
 int cpr_monotimed(cpr_monocond_t *cond, mtx_t *mtx, cpr_timepoint_t tp) {
-    return pthread_cond_timedwait(cond, (pthread_mutex_t*)mtx, tp);
+    return pthread_cond_timedwait(cond, (pthread_mutex_t *)mtx, tp);
 }
 
 int cpr_monosleep(pthread_cond_t *cond, mtx_t *mtx, cpr_timepoint_t tp) {
     int rc;
     do {
-        rc = pthread_cond_timedwait(cond, (pthread_mutex_t*)mtx, tp);
+        rc = pthread_cond_timedwait(cond, (pthread_mutex_t *)mtx, tp);
     } while (rc == 0);
     return rc == ETIMEDOUT ? 0 : rc;
 }
-

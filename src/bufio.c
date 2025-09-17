@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 
 void cpr_freebuf(bufio_t *r) {
+    if (!r) return;
     cpr_flushbuf(r);
 
 #ifndef _WIN32
@@ -27,7 +28,13 @@ void cpr_freebuf(bufio_t *r) {
 
     if (r->fd > -1) {
         struct stat ino;
-#ifndef _WIN32
+#ifdef _WIN32
+        if (r->socket) {
+            shutdown(r->fd, SD_BOTH);
+            closesocket(r->fd);
+            r->fd = -1;
+        }
+#else
         if (!fstat(r->fd, &ino) && S_ISSOCK(ino.st_mode))
             shutdown(r->fd, SHUT_RDWR);
 #endif
@@ -37,11 +44,23 @@ void cpr_freebuf(bufio_t *r) {
     free(r);
 }
 
+bufio_t *cpr_sockbuf(int so, size_t bufsize) {
+#ifdef _WIN32
+    bufio_t *b = cpr_makebuf(so, bufsize);
+    if (b) b->socket = true;
+    return b;
+#else
+    return cpr_makebuf(so, bufsize);
+#endif
+}
+
 bufio_t *cpr_makebuf(int fd, size_t bufsize) {
     if (fd < 0 || !bufsize) return NULL;
     bufio_t *r = malloc(sizeof(bufio_t) + (bufsize * 2));
     if (!r) return NULL;
-#ifndef _WIN32
+#ifdef _WIN32
+    r->socket = false;
+#else
     if (isatty(fd)) {
         struct termios t;
         if (tcgetattr(fd, &r->tty) < 0) {
@@ -87,7 +106,15 @@ bool cpr_resetbuf(bufio_t *r, size_t consume) {
 bool cpr_flushbuf(bufio_t *w) {
     if (!w || !w->put) return false;
     char *out = ((char *)w) + sizeof(bufio_t) + w->bufsize;
-    ssize_t result = write(w->fd, out, w->put);
+    ssize_t result;
+#ifdef _WIN32
+    if (w->socket) {
+        result = send(w->fd, out, w->put, 0);
+        goto writer;
+    }
+#endif
+    result = write(w->fd, out, w->put);
+writer:
     if ((size_t)result < w->put) {
         size_t remaining = w->put - (size_t)result;
         memmove(out, out + result, remaining);
@@ -133,7 +160,15 @@ bool cpr_fillbuf(bufio_t *r, size_t request) {
             r->start = 0;
         }
         // FlawFinder: read any extra data to complete request
-        ssize_t n = read(r->fd, &r->buf[r->end], r->bufsize - r->end);
+        ssize_t n;
+#ifdef _WIN32
+        if (r->socket) {
+            n = recv(r->fd, &r->buf[r->end], r->bufsize - r->end, 0);
+            goto reader;
+        }
+#endif
+        n = read(r->fd, &r->buf[r->end], r->bufsize - r->end);
+    reader:
         if (n > 0) {
             r->end += n;
             r->buf[r->end] = 0;

@@ -3,11 +3,9 @@
 
 #include "thread.h"
 
-void cor_condlock_init(cpr_condlock_t *lock, unsigned max) {
+void cor_condlock_init(cpr_condlock_t *lock) {
     if (!lock) return;
-    lock->pending = 0;
-    lock->waiting = 0;
-    lock->sharing = 0;
+    lock->pending = lock->waiting = lock->sharing = 0;
     mtx_init(&lock->mtx, mtx_plain);
     cnd_init(&lock->bcast);
 }
@@ -60,4 +58,38 @@ void cpr_condlock_commit(cpr_condlock_t *lock) {
     else if (lock->waiting)
         cnd_signal(&lock->bcast);
     mtx_unlock(&lock->mtx);
+}
+
+void cpr_semaphore_init(cpr_semaphore_t *sem, unsigned limit) {
+    if (!sem) return;
+    sem->count = limit;
+    sem->waits = sem->used = 0;
+    mtx_init(&sem->mtx, mtx_plain);
+    cnd_init(&sem->cond);
+}
+
+void cpr_semaphore_free(cpr_semaphore_t *sem) {
+    if (!sem) return;
+    cnd_destroy(&sem->cond);
+    mtx_destroy(&sem->mtx);
+}
+
+void cpr_semaphore_acquire(cpr_semaphore_t *sem) {
+    if (!sem) return;
+    mtx_lock(&sem->mtx);
+    while (sem->used >= sem->count) {
+        ++sem->waits;
+        cnd_wait(&sem->cond, &sem->mtx);
+        --sem->waits;
+    }
+    ++sem->used;
+    mtx_unlock(&sem->mtx);
+}
+
+void cpr_semaphore_release(cpr_semaphore_t *sem) {
+    if (!sem) return;
+    mtx_lock(&sem->mtx);
+    if (sem->used) --sem->used;
+    if (sem->waits) cnd_signal(&sem->cond);
+    mtx_unlock(&sem->mtx);
 }

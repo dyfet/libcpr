@@ -97,11 +97,21 @@ typedef struct {
     unsigned pending, waiting, sharing;
 } cpr_condlock_t;
 
-void cor_condlock_init(cpr_condlock_t *lock, unsigned max);
+typedef struct {
+    mtx_t mtx;
+    cnd_t cond;
+    unsigned count, waits, used;
+} cpr_semaphore_t;
+
+void cor_condlock_init(cpr_condlock_t *lock);
 void cor_condlock_free(cpr_condlock_t *lock);
 void cor_condlock_access(cpr_condlock_t *lock);
 void cpr_condlock_release(cpr_condlock_t *lock);
 void cpr_condlock_modify(cpr_condlock_t *lock);
 void cpr_condlock_commit(cpr_condlock_t *lock);
+void cpr_semaphore_init(cpr_semaphore_t *sem, unsigned limit);
+void cpr_semaphore_free(cpr_semaphore_t *sem);
+void cpr_semaphore_acquire(cpr_semaphore_t *sem);
+void cpr_semaphore_release(cpr_semaphore_t *sem);
 
 #endif

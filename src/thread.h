@@ -91,4 +91,17 @@ static inline int cnd_broadcast(cnd_t *cond) {
 #include <threads.h>
 #endif
 
+typedef struct {
+    mtx_t mtx;
+    cnd_t bcast;
+    unsigned pending, waiting, sharing;
+} cpr_condlock_t;
+
+void cor_condlock_init(cpr_condlock_t *lock, unsigned max);
+void cor_condlock_free(cpr_condlock_t *lock);
+void cor_condlock_access(cpr_condlock_t *lock);
+void cpr_condlock_release(cpr_condlock_t *lock);
+void cpr_condlock_modify(cpr_condlock_t *lock);
+void cpr_condlock_commit(cpr_condlock_t *lock);
+
 #endif

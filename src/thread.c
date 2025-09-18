@@ -93,3 +93,46 @@ void cpr_semaphore_release(cpr_semaphore_t *sem) {
     if (sem->waits) cnd_signal(&sem->cond);
     mtx_unlock(&sem->mtx);
 }
+
+void cpr_waitgroup_init(cpr_waitgroup_t *wg, unsigned count) {
+    if (!wg) return;
+    wg->count = count;
+    mtx_init(&wg->mtx, mtx_plain);
+    cnd_init(&wg->bcast);
+}
+
+void cpr_waitgroup_free(cpr_waitgroup_t *wg) {
+    if (!wg) return;
+    cnd_destroy(&wg->bcast);
+    mtx_destroy(&wg->mtx);
+}
+
+void cpr_waitgroup_add(cpr_waitgroup_t *wg, unsigned count) {
+    if (!wg) return;
+    mtx_lock(&wg->mtx);
+    wg->count += count;
+    mtx_unlock(&wg->mtx);
+}
+
+void cpr_waitgroup_wait(cpr_waitgroup_t *wg) {
+    if (!wg) return;
+    mtx_lock(&wg->mtx);
+    while (wg->count) {
+        cnd_wait(&wg->bcast, &wg->mtx);
+    }
+    mtx_unlock(&wg->mtx);
+}
+
+void cpr_waitgroup_done(cpr_waitgroup_t *wg) {
+    if (!wg) return;
+    mtx_lock(&wg->mtx);
+    if (wg->count) --wg->count;
+    if (!wg->count)
+        cnd_broadcast(&wg->bcast);
+    mtx_unlock(&wg->mtx);
+}
+
+void cpr_waitgroup_finish(cpr_waitgroup_t *wg) {
+    cpr_waitgroup_wait(wg);
+    cpr_waitgroup_free(wg);
+}

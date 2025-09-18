@@ -103,6 +103,12 @@ typedef struct {
     unsigned count, waits, used;
 } cpr_semaphore_t;
 
+typedef struct {
+    mtx_t mtx;
+    cnd_t bcast;
+    unsigned count;
+} cpr_waitgroup_t;
+
 void cor_condlock_init(cpr_condlock_t *lock);
 void cor_condlock_free(cpr_condlock_t *lock);
 void cor_condlock_access(cpr_condlock_t *lock);
@@ -113,5 +119,11 @@ void cpr_semaphore_init(cpr_semaphore_t *sem, unsigned limit);
 void cpr_semaphore_free(cpr_semaphore_t *sem);
 void cpr_semaphore_acquire(cpr_semaphore_t *sem);
 void cpr_semaphore_release(cpr_semaphore_t *sem);
+void cpr_waitgroup_init(cpr_waitgroup_t *wg, unsigned count);
+void cpr_waitgroup_free(cpr_waitgroup_t *wg);
+void cpr_waitgroup_add(cpr_waitgroup_t *wg, unsigned count);
+void cpr_waitgroup_wait(cpr_waitgroup_t *wg);
+void cpr_waitgroup_done(cpr_waitgroup_t *wg);
+void cpr_waitgroup_finish(cpr_waitgroup_t *wg);
 
 #endif

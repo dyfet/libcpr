@@ -2,6 +2,7 @@
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
 #include "system.h"
+#include "strchar.h"
 
 #ifdef _WIN32
 int make_dir(const char *path, int perms) {
@@ -76,23 +77,44 @@ ssize_t getline(char **lp, size_t *size, FILE *fp) {
     return (ssize_t)(pos);
 }
 
-char *getpass(const char *prompt) { // FlawFinder: ignore for now
-    static char buffer[128];
+int get_pass(char *buf, size_t size, const char *prompt) {
+    if (!buf || size == 0 || !prompt) return -1;
     DWORD mode;
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE) return NULL;
-    if (!GetConsoleMode(hStdin, &mode)) return NULL;
+    if (hStdin == INVALID_HANDLE_VALUE || !GetConsoleMode(hStdin, &mode))
+        return -2;
+
     fputs(prompt, stdout);
     fflush(stdout);
-    SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT));
-    if (!fgets(buffer, sizeof(buffer), stdin)) {
+    if (!SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT))) return -3;
+    if (!fgets(buf, (int)size, stdin)) {
         SetConsoleMode(hStdin, mode);
-        return NULL;
+        return -4;
     }
 
     SetConsoleMode(hStdin, mode);
     fputs("\n", stdout);
-    buffer[strcspn(buffer, "\r\n")] = '\0';
-    return buffer;
+    buf[strcspn(buf, "\r\n")] = '\0';
+    return 0;
+}
+
+#else
+#include <termios.h>
+
+int gwr_pass(char *buf, size_t size) {
+    struct termios old, new;
+    if (tcgetattr(STDIN_FILENO, &old) != 0) return -1;
+    new = old;
+    new.c_lflag &= ~ECHO;
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &new) != 0) return -1;
+
+    printf("Password: ");
+    fflush(stdout);
+    if (!fgets(buf, (int)size, stdin)) buf[0] = '\0';
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &old);
+    printf("\n");
+    size_t len = cpr_strlen(buf, size);
+    if (len > 0 && buf[len - 1] == '\n') buf[len - 1] = '\0';
+    return 0;
 }
 #endif

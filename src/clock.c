@@ -22,7 +22,7 @@ bool cpr_systime(cpr_timepoint_t tp, time_t when) {
 }
 
 // timeval can be NULL if we just want to test expiration...
-int cpr_expires(const cpr_timepoint_t deadline, struct timeval *tv) {
+long cpr_expires(const cpr_timepoint_t deadline, struct timeval *tv) {
     if (!deadline) return true;
     struct timespec now, delta;
     clock_gettime(CLOCK_MONOTONIC, &now);

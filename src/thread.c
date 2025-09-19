@@ -56,7 +56,7 @@ void cpr_condlock_commit(cpr_condlock_t *lock) {
     if (lock->pending)
         cnd_signal(&lock->bcast);
     else if (lock->waiting)
-        cnd_signal(&lock->bcast);
+        cnd_broadcast(&lock->bcast);
     mtx_unlock(&lock->mtx);
 }
 

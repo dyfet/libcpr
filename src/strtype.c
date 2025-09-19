@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
-#include "string.h"
+#include "strtype.h"
+#include "strchar.h"
+#include "memory.h"
 
 void free_string(string_t *str) {
     if (str && *str)
@@ -61,10 +63,10 @@ string_t string_clone(const string_t str) {
     if (!str)
         return NULL;
 
-    string_t dup = (string_t)malloc(str->size + sizeof(struct _string));
+    size_t size = str->size + sizeof(struct _string);
+    string_t dup = (string_t)malloc(size);
     if (!dup) return NULL;
-    // FlawFinder: ignore
-    memcpy(dup, str, str->used + 1 + sizeof(struct _string)); // NOLINT
+    cpr_memcpy(dup, size, str, size);
     return dup;
 }
 
@@ -95,8 +97,7 @@ string_t string_append(string_t str, const char *val) {
     size_t size = string_size(str) - str->used - 1;
     size_t len = cpr_strlen(val, size);
     if (len)
-        // FlawFinder: ignore
-        memcpy(mem, val, len); // NOLINT
+        cpr_memcpy(mem, size, val, len);
 
     mem[len] = 0;
     str->used += (uint16_t)len;
@@ -115,7 +116,7 @@ string_t make_string(const char *val, size_t max) {
 string_t string_upper(string_t str) {
     char *mem = string_get(str);
     while (*mem) {
-        *mem = toupper(*mem);
+        *mem = (char)toupper(*mem);
         ++mem;
     }
     return str;
@@ -124,7 +125,7 @@ string_t string_upper(string_t str) {
 string_t string_lower(string_t str) {
     char *mem = string_get(str);
     while (*mem) {
-        *mem = tolower(*mem);
+        *mem = (char)tolower(*mem);
         ++mem;
     }
     return str;

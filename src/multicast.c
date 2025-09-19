@@ -7,6 +7,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 
 unsigned int if_index = 0;
 
@@ -95,7 +96,7 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
 #else
 iface_t find_multicast(iface_t list, const char *iface, int family) {
     while (list) {
-        struct sockaddr *addr = NULL;
+        const struct sockaddr *addr = NULL;
         if (eq(list->ifa_name, iface) && (list->ifa_flags & IFF_MULTICAST))
             addr = list->ifa_addr;
         if (addr && addr->sa_family == family)

@@ -27,7 +27,6 @@ void cpr_freebuf(bufio_t *r) {
 #endif
 
     if (r->fd > -1) {
-        struct stat ino;
 #ifdef _WIN32
         if (r->socket) {
             shutdown(r->fd, SD_BOTH);
@@ -35,6 +34,7 @@ void cpr_freebuf(bufio_t *r) {
             r->fd = -1;
         }
 #else
+        struct stat ino;
         if (!fstat(r->fd, &ino) && S_ISSOCK(ino.st_mode))
             shutdown(r->fd, SHUT_RDWR);
 #endif
@@ -113,8 +113,8 @@ bool cpr_flushbuf(bufio_t *w) {
         goto writer;
     }
 #endif
-    result = write(w->fd, out, w->put);
-writer:
+    result = write(w->fd, out, w->put); // FlawFinder: ignore
+writer:                                 // NOLINT
     if ((size_t)result < w->put) {
         size_t remaining = w->put - (size_t)result;
         memmove(out, out + result, remaining);
@@ -167,8 +167,8 @@ bool cpr_fillbuf(bufio_t *r, size_t request) {
             goto reader;
         }
 #endif
-        n = read(r->fd, &r->buf[r->end], r->bufsize - r->end);
-    reader:
+        n = read(r->fd, &r->buf[r->end], r->bufsize - r->end); // FlawFinder: ignore
+    reader:                                                    // NOLINT
         if (n > 0) {
             r->end += n;
             r->buf[r->end] = 0;

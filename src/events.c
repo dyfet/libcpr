@@ -41,9 +41,9 @@ bool cpr_setevt(event_t *evt) {
     if (!evt || evt->fds[0] == -1) return false;
 #ifdef EFD_NONBLOCK
     uint64_t one = 1;
-    int rtn = write(evt->fds[1], &one, sizeof(one));
+    ssize_t rtn = write(evt->fds[1], &one, sizeof(one));
 #else
-    int rtn = write(evt->fds[1], "x", 1);
+    ssize_t rtn = write(evt->fds[1], "x", 1);
 #endif
     if (rtn < 0) {
         cpr_freeevt(evt);
@@ -56,10 +56,10 @@ bool cpr_clearevt(event_t *evt) {
     if (!evt || evt->fds[0] == -1) return false;
 #ifdef EFD_NONBLOCK
     uint64_t count;
-    int rtn = read(evt->fds[0], &count, sizeof(count)); // FlawFinder: ok
+    ssize_t rtn = read(evt->fds[0], &count, sizeof(count)); // FlawFinder: ok
 #else
     char buf[64];
-    int rtn = read(evt->fds[0], buf, sizeof(buf)); // FlawFinder: ok
+    ssize_t rtn = read(evt->fds[0], buf, sizeof(buf)); // FlawFinder: ok
 #endif
     if (rtn < 0) {
         cpr_freeevt(evt);

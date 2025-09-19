@@ -3,7 +3,7 @@
 
 #undef  NDEBUG
 #include <assert.h>
-#include "../src/string.h"
+#include "../src/strtype.h"
 
 int main(int argc, char **argv) {
     char *hello = "hello";

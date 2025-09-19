@@ -5,7 +5,6 @@
 #include <assert.h>
 #include "../src/system.h"
 #include "../src/pipeline.h"
-#include "../src/waitgroup.h"
 #include "../src/events.h"
 
 static void test_events() {

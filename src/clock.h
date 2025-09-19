@@ -23,7 +23,7 @@ bool cpr_systime(cpr_timepoint_t tp, time_t when);
 bool cpr_gettime(cpr_timepoint_t ts);
 void cpr_addmsec(cpr_timepoint_t ts, long ms);
 bool cpr_remains(const cpr_timepoint_t mono, cpr_duration_t rel);
-int cpr_expires(const cpr_timepoint_t deadline, struct timeval *tv);
+long cpr_expires(const cpr_timepoint_t deadline, struct timeval *tv);
 void cpr_elapsed(const cpr_timepoint_t from, cpr_duration_t since);
 time_t cpr_time(const cpr_timepoint_t mono);
 void cpr_monoinit(cpr_monocond_t *cond);

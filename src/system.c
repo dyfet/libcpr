@@ -47,7 +47,7 @@ ssize_t getline(char **lp, size_t *size, FILE *fp) {
     int c = EOF;
 
     if (lp == NULL || fp == NULL || size == NULL) return -1;
-    c = getc(fp);
+    c = getc(fp); // FlawFinder: ignore
     if (c == EOF) return -1;
     if (*lp == NULL) {
         *lp = malloc(128);
@@ -70,13 +70,13 @@ ssize_t getline(char **lp, size_t *size, FILE *fp) {
 
         ((unsigned char *)(*lp))[pos++] = (unsigned char)c;
         if (c == '\n') break;
-        c = getc(fp);
+        c = getc(fp); // FlawFinder: ignore
     }
     (*lp)[pos] = '\0';
     return (ssize_t)(pos);
 }
 
-char *getpass(const char *prompt) {
+char *getpass(const char *prompt) { // FlawFinder: ignore for now
     static char buffer[128];
     DWORD mode;
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);

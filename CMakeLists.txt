@@ -62,9 +62,9 @@ add_executable(test_system test/system.c src/system.h)
 add_test(NAME test-system COMMAND test_system)
 target_link_libraries(test_system PRIVATE cpr)
 
-add_executable(test_string test/string.c src/string.h)
-add_test(NAME test-string COMMAND test_string)
-target_link_libraries(test_string PRIVATE cpr)
+add_executable(test_strtype test/strtype.c src/strtype.h)
+add_test(NAME test-strtype COMMAND test_strtype)
+target_link_libraries(test_strtype PRIVATE cpr)
 
 add_executable(test_endian test/endian.c src/endian.h)
 add_test(NAME test-endian COMMAND test_endian)

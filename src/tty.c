@@ -32,7 +32,7 @@ bool tty_reset(tty_ctx *tty) {
     tty->active.c_cflag = CLOCAL | CREAD | HUPCL;
     tty->active.c_iflag = IGNBRK;
 
-    memset(&tty->active.c_cc, 0, sizeof(tty->active.c_cc)); // NOLINT
+    cpr_memset(&tty->active.c_cc, 0, sizeof(tty->active.c_cc));
     tty->active.c_cc[VMIN] = 1;
 
     tty->active.c_cflag |= tty->saved.c_cflag & (CRTSCTS | CSIZE | PARENB | PARODD | CSTOPB);
@@ -89,7 +89,7 @@ int tty_canon(tty_ctx *tty, const char *nl) {
     tcsetattr(tty->fd, TCSANOW, attr);
 
 #ifdef _PC_MAX_CANON
-    return fpathconf(tty->fd, _PC_MAX_CANON);
+    return (int)fpathconf(tty->fd, _PC_MAX_CANON);
 #else
     return MAX_CANON
 #endif
@@ -100,9 +100,9 @@ int tty_packet(tty_ctx *tty, size_t size, uint8_t timer) {
         return -EBADF;
 
 #ifdef _PC_MAX_INPUT
-    int max = fpathconf(tty->fd, _PC_MAX_INPUT);
+    long max = fpathconf(tty->fd, _PC_MAX_INPUT);
 #else
-    int max = MAX_INPUT;
+    long max = MAX_INPUT;
 #endif
 
     if (size > (size_t)max)
@@ -114,13 +114,13 @@ int tty_packet(tty_ctx *tty, size_t size, uint8_t timer) {
     attr->c_cc[VTIME] = timer;
     attr->c_lflag &= ~ICANON;
     tcsetattr(tty->fd, TCSANOW, attr);
-    return size;
+    return (int)size;
 }
 
 bool tty_putch(tty_ctx *ctx, char ch) {
     if (!ctx) return false;
     ctx->error = 0;
-    int rtn = write(ctx->out, &ch, 1);
+    ssize_t rtn = write(ctx->out, &ch, 1);
     if (rtn < 0) ctx->error = errno;
     return rtn == 1;
 }
@@ -129,7 +129,7 @@ char tty_getch(tty_ctx *ctx) {
     if (!ctx) return 0;
     ctx->error = 0;
     char ch;
-    int rtn = read(ctx->fd, &ch, 1); // FlawFinder: valid
+    ssize_t rtn = read(ctx->fd, &ch, 1); // FlawFinder: valid
     if (rtn < 0) ctx->error = errno;
     if (rtn != 1) return 0;
     if (ctx->echo > 1 && ch > 31 && ch != 127) {
@@ -145,7 +145,7 @@ char tty_getch(tty_ctx *ctx) {
 ssize_t tty_putline(tty_ctx *ctx, const char *str) {
     if (!str || !ctx) return -1;
     ctx->error = 0;
-    int rtn = write(ctx->out, str, cpr_strlen(str, 256));
+    ssize_t rtn = write(ctx->out, str, cpr_strlen(str, 256));
     if (rtn < 0) ctx->error = errno;
     return rtn;
 }

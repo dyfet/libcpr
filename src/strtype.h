@@ -5,6 +5,7 @@
 #define CPR_STRING_H
 
 #include "strchar.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

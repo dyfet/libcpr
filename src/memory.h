@@ -51,14 +51,11 @@ static inline FILE *cpr_memstring(const char *text, size_t max) {
 }
 #endif
 
-#define NEWP(ptr, T) (T *)cpr_new((void **)&ptr, sizeof(T))
-#define FREEP(ptr) cpr_free((void **)&ptr)
-#define PAGER(mem, T) (T *)pager_alloc(mem, sizeof(T))
-#define MAKE_PAGER(T, max) pager_create(sizeof(T), max)
-#define FREE_PAGER(ptr) pager_free(ptr)
-#define REF(ptr, T) (T *)cpr_ref(ptr)
-#define MAKE_REF(ptr, T) (*ptr == NULL ? *ptr = cpr_makeref(sizeof(T)) : cpr_retain(*ptr))
-#define RELEASE_REF(ptr) (*ptr = cpr_release(*ptr))
+#define NEWP(ptr, T) ((T *)cpr_new((void **)&(ptr), sizeof(T)))
+#define FREEP(ptr) cpr_free((void **)&(ptr))
+#define REF(ptr, T) ((T *)cpr_ref((ptr)))
+#define MAKE_REF(ptr, T) ((*(ptr) == NULL) ? (*(ptr) = cpr_makeref(sizeof(T))) : cpr_retain(*(ptr)))
+#define RELEASE_REF(ptr) (*(ptr) = cpr_release(*(ptr)))
 
 #ifdef __cplusplus
 }

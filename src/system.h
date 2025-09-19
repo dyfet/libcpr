@@ -49,7 +49,7 @@ bool is_file(const char *path);
 
 #ifdef _WIN32
 ssize_t getline(char **lp, size_t *size, FILE *fp);
-char *getpass(const char *prompt);
+char *getpass(const char *prompt); // FlawFinder: ignore for now
 #endif
 
 #ifdef __cplusplus

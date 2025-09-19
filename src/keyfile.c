@@ -70,7 +70,7 @@ keysection_t *load_keyfile(const char *path) {
     while (!feof(fp) && NULL != (lp = fgets(linebuf, sizeof(linebuf), fp))) {
         size_t len = cpr_strlen(lp, sizeof(linebuf));
         if (!len || lp[len - 1] != '\n') continue;
-        while (len > 0 && isspace(lp[--len]))
+        while (len > 0 && isspace(lp[--len])) // NOLINT(bugprone-inc-dec-in-conditions)
             lp[len] = 0;
 
         while (*lp && isspace(*lp))
@@ -78,7 +78,7 @@ keysection_t *load_keyfile(const char *path) {
 
         if (!*lp) continue;
         if (*lp == '[' && lp[len] == ']') {
-            while (len > 1 && isspace(lp[--len]))
+            while (len > 1 && isspace(lp[--len])) // NOLINT(bugprone-inc-dec-in-conditions)
                 ;
 
             if (len < 2) continue;
@@ -121,7 +121,7 @@ keysection_t *load_keyfile(const char *path) {
 bool save_keyfile(const char *path, keysection_t *root) {
     if (!path || !root) return false;
     remove(path);
-    FILE *fp = fopen(path, "w");
+    FILE *fp = fopen(path, "w"); // FlawFinder: ignore
     if (!fp) return false;
     for (keysection_t *section = root; section != NULL; section = section->next) {
         fprintf(fp, "[%s]\n", section->id);

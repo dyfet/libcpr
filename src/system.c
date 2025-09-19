@@ -78,7 +78,8 @@ ssize_t getline(char **lp, size_t *size, FILE *fp) {
 }
 
 int get_pass(char *buf, size_t size, const char *prompt) {
-    if (!buf || size == 0 || !prompt) return -1;
+    if (prompt == NULL) prompt = "Password: ";
+    if (!buf || size == 0) return -1;
     DWORD mode;
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
     if (hStdin == INVALID_HANDLE_VALUE || !GetConsoleMode(hStdin, &mode))
@@ -101,14 +102,16 @@ int get_pass(char *buf, size_t size, const char *prompt) {
 #else
 #include <termios.h>
 
-int gwr_pass(char *buf, size_t size) {
+int get_pass(char *buf, size_t size, const char *prompt) {
+    if (prompt == NULL) prompt = "Password: ";
+    if (!buf || size == 0) return -1;
     struct termios old, new;
     if (tcgetattr(STDIN_FILENO, &old) != 0) return -1;
     new = old;
     new.c_lflag &= ~ECHO;
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &new) != 0) return -1;
 
-    printf("Password: ");
+    fputs(prompt, stdout);
     fflush(stdout);
     if (!fgets(buf, (int)size, stdin)) buf[0] = '\0';
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &old);

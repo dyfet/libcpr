@@ -46,7 +46,7 @@ extern "C" {
 int make_dir(const char *path, int perms);
 bool is_dir(const char *path);
 bool is_file(const char *path);
-int gwr_pass(char *buf, size_t size);
+int get_pass(char *buf, size_t size, const char *prompt);
 
 #ifdef _WIN32
 ssize_t getline(char **lp, size_t *size, FILE *fp);

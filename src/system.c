@@ -42,6 +42,29 @@ bool is_file(const char *path) {
     return false;
 }
 
+size_t scan_file(FILE *fp, size_t size, bool (*proc)(const char *, size_t)) {
+    if (!fp) return 0;
+    if (size > 65536) size = 65536;
+    char lbuf[size];
+    size_t count = 0;
+    while (!feof(fp)) {
+        if (!fgets(lbuf, (int)size, fp)) break;
+        if (!proc(lbuf, ++count)) break;
+    }
+    return count;
+}
+
+size_t scan_dir(DIR *dir, bool (*proc)(const struct dirent *)) {
+    if (!dir) return 0;
+    size_t count = 0;
+    struct dirent *entry = NULL;
+    while (NULL != (entry = readdir(dir))) {
+        ++count;
+        if (!proc(entry)) break;
+    }
+    return count;
+}
+
 #ifdef _WIN32
 ssize_t getline(char **lp, size_t *size, FILE *fp) {
     size_t pos = 0;

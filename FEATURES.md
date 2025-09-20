@@ -21,7 +21,8 @@ terminal settings at close, and performing shutdown for sockets.
 
 Hi resolution monotonic clocking functions and monotonic thread support. This
 supports converting monotonic timepoint for use with poll, select, ppoll, and
-pselect as well as with time\_t system time.
+pselect as well as with time\_t system time. This also supports monotonic
+deadline clock timing using pthread conditionals.
 
 ## cpr/endian.h
 
@@ -76,17 +77,18 @@ A pure simple pure C string type.
 ## cpr/system.h
 
 Unix and posix standard system functions, platform specific functions and
-headers. Offers common mapping between posix error numbers and Windows error
-codes. Somewhat analogous to what the C++ filesystem header does. This is the
-only header meant as an abstraction layer.
+headers. It also may offer some missing library functions, particularly for
+mingw32 systems. Somewhat analogous to what the C++ filesystem header does.
+This is the only header meant as an abstraction layer.
 
 ## cpr/tty.h
 
-Low level access to and control over posix tty serial devices.
+Low level access to and control over posix termios tty serial devices.
 
-## cpr/waitgroup.h
+## cpr/thread.h
 
-This is a basic golang-like wait group using C11 threads. The waitgroup is
-useful when synchronizing and avoiding race conditions using detached threads.
-Since pthread supports joinable threads, this may be less used than in go.
-
+Cross-platform threading support. For C11 systems which do not support C11
+threading, it can map posix pthread support to C11 threads thru the header.
+This is used for MingW32 and BSD systems where libc is not updated for C11. It
+also includes support fir extra threading synchronization primitives such as
+semaphores, rw conditional locking, and Golang style wait groups.

@@ -3,8 +3,13 @@
     "C_Cpp.default.cStandard": "c17",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "cSpell.words": [
+        "monocond",
+        "monoinit",
+        "monosleep",
+        "monotimed",
         "ppoll",
-        "pselect"
+        "pselect",
+        "thrd"
     ],
     "files.exclude": {
         "**/.git": true,

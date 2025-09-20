@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #ifdef _WIN32
 #define MICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS 0
@@ -23,7 +24,6 @@
 #include <direct.h>
 #include <winioctl.h>
 #include <fileapi.h>
-#include <stdio.h>
 #include <string.h>
 #endif
 
@@ -47,6 +47,8 @@ int make_dir(const char *path, int perms);
 bool is_dir(const char *path);
 bool is_file(const char *path);
 int get_pass(char *buf, size_t size, const char *prompt);
+size_t scan_file(FILE *fp, size_t size, bool (*proc)(const char *, size_t));
+size_t scan_dir(DIR *dir, bool (*proc)(const struct dirent *));
 
 #ifdef _WIN32
 ssize_t getline(char **lp, size_t *size, FILE *fp);

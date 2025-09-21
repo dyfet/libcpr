@@ -43,6 +43,16 @@
 extern "C" {
 #endif
 
+extern int debug_level;
+
+__attribute__((noreturn)) __attribute__((format(printf, 2, 3))) void cpr_crit(int exit_code, const char *fmt, ...);
+
+#ifdef NDEBUG
+#define cpr_debug(l, fmt, ...)
+#else
+__attribute__((format(printf, 2, 3))) void cpr_debug(int level, const char *fmt, ...);
+#endif
+
 int make_dir(const char *path, int perms);
 bool is_dir(const char *path);
 bool is_file(const char *path);

@@ -43,7 +43,7 @@
 extern "C" {
 #endif
 
-extern int debug_level;
+extern int cpr_verbose;
 
 __attribute__((noreturn)) __attribute__((format(printf, 2, 3))) void cpr_crit(int exit_code, const char *fmt, ...);
 
@@ -63,6 +63,10 @@ size_t scan_dir(DIR *dir, bool (*proc)(const struct dirent *));
 #ifdef _WIN32
 ssize_t getline(char **lp, size_t *size, FILE *fp);
 #endif
+
+inline void test() {
+    cpr_verbose = 0;
+}
 
 #ifdef __cplusplus
 }

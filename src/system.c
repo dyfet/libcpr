@@ -4,12 +4,12 @@
 #include "system.h"
 #include "strchar.h"
 
-int debug_level = 0;
+int cpr_verbose = 0;
 
 __attribute__((noreturn)) __attribute__((format(printf, 2, 3))) void cpr_crit(int exit_code, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
+    vfprintf(stderr, fmt, args); // FlawFinder: ignore
     fputc('\n', stderr);
     fflush(stderr);
     va_end(args);
@@ -18,10 +18,10 @@ __attribute__((noreturn)) __attribute__((format(printf, 2, 3))) void cpr_crit(in
 
 #ifndef NDEBUG
 __attribute__((format(printf, 2, 3))) void cpr_debug(int level, const char *fmt, ...) {
-    if (debug_level < level) return;
+    if (cpr_verbose < level) return;
     va_list args;
     va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
+    vfprintf(stderr, fmt, args); // FlawFinder: ignore
     fputc('\n', stderr);
     fflush(stderr);
     va_end(args);

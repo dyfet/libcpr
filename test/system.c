@@ -3,7 +3,7 @@
 
 #undef  NDEBUG
 #include <assert.h>
-#include "../src/system.h"
+#include "../src/service.h"
 #include "../src/pipeline.h"
 #include "../src/events.h"
 

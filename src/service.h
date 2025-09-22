@@ -26,6 +26,7 @@
 #endif
 
 bool is_service();
+__attribute__((format(printf, 3, 4))) void cpr_logger(FILE *out, int level, const char *fmt, ...);
 __attribute__((format(printf, 2, 3))) void cpr_syslog(int priority, const char *fmt, ...);
 void cpr_openlog(const char *id, int facility, int flags);
 void cpr_closelog();

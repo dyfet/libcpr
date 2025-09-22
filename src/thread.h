@@ -5,6 +5,7 @@
 #define CPR_THREAD_H
 
 #if defined(_WIN32) || defined(__FreeBSD__)
+#define CPR_REQUIRES_PTHREAD 1
 #include <pthread.h>
 #include <stdlib.h>
 #include <errno.h>

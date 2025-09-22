@@ -15,6 +15,9 @@
 extern "C" {
 #endif
 
+#define ISO_DATETIME_FORMAT "%Y-%m-%dT%H:%M:%S%z"
+#define LOG_DATETIME_FORMAT "%Y-%m-%d %H:%M:%S"
+
 typedef struct timespec *cpr_timepoint_t;
 typedef struct timespec *cpr_duration_t;
 typedef pthread_cond_t cpr_monocond_t;

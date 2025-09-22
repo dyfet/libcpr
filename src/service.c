@@ -82,11 +82,7 @@ void cpr_openlog(const char *id, int facility, int flags) {
 #endif
 
 __attribute__((format(printf, 3, 4))) void cpr_logger(FILE *out, int level, const char *fmt, ...) {
-#ifdef CPR_REQUIRES_PTHREAD
     static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
-#else
-    static mtx_t mtx;
-#endif
     va_list args;
     va_start(args, fmt);
     const char *type = "note";
@@ -113,9 +109,9 @@ __attribute__((format(printf, 3, 4))) void cpr_logger(FILE *out, int level, cons
         break;
     }
     if (cpr_verbose <= level) {
-        mtx_lock(&mtx);
+        pthread_mutex_lock(&mtx);
         time_t now;
-        struct tm ts;
+        struct tm ts = {0};
         char buf[80];
         time(&now);
 #ifdef _WIN32
@@ -128,7 +124,7 @@ __attribute__((format(printf, 3, 4))) void cpr_logger(FILE *out, int level, cons
         vfprintf(out, fmt, args); // FlawFinder: ignore
         fputc('\n', out);
         fflush(out);
-        mtx_unlock(&mtx);
+        pthread_mutex_unlock(&mtx);
     }
     va_end(args);
 }

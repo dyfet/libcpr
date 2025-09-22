@@ -21,6 +21,7 @@ typedef struct _memshare {
     atomic_uint refcount;
 } *memshare_t;
 
+size_t cpr_hexload(uint8_t *out, const char *hex, size_t size);
 char *cpr_hexdup(const uint8_t *bin, size_t size);
 void *cpr_new(void **ptr, size_t size);
 void cpr_free(void **ptr);

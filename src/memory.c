@@ -3,8 +3,22 @@
 
 #include "memory.h"
 
+static const char *hex = "0123456789abcdef";
+
+size_t cpr_hexload(uint8_t *out, const char *str, size_t size) {
+    if (!out || !size || !str) return 0;
+    size_t count = 0;
+    while (count < size && *str) {
+        const char *cp1 = strchr(hex, tolower(str[0]));
+        const char *cp2 = strchr(hex, tolower(str[1]));
+        if (!cp1 || !cp2) break;
+        out[count++] = ((uint8_t)(cp1 - hex) << 4) | (uint8_t)(cp2 - hex);
+        str += 2;
+    }
+    return count;
+}
+
 char *cpr_hexdup(const uint8_t *bin, size_t size) {
-    static const char *hex = "0123456789abcdef";
     if (!bin) return NULL;
     char *out = malloc((size * 2) + 1);
     if (!out) return NULL;

@@ -35,10 +35,8 @@ if(BUILD_SHARED_LIBS AND CMAKE_BUILD_TYPE MATCHES "^Rel")
     )
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-    target_compile_options(cpr PUBLIC -pthread)
-    target_link_options(cpr PUBLIC -pthread)
-endif()
+target_compile_options(cpr PUBLIC -pthread)
+target_link_options(cpr PUBLIC -pthread)
 
 # testing
 

@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+typedef void (*cpr_free_t)(void *);
+
 typedef struct _memshare {
     atomic_uint refcount;
 } *memshare_t;

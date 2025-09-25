@@ -60,7 +60,6 @@ void cpr_closelog() {
 void cpr_openlog(const char *id, int facility, int flags) {
     if (!id) return;
     int level = LOG_INFO;
-    if (!flags) flags = LOG_NDELAY;
     switch (cpr_verbose) {
     case 0:
         level = LOG_ERR;
@@ -81,33 +80,63 @@ void cpr_openlog(const char *id, int facility, int flags) {
 }
 #endif
 
+__attribute__((noreturn)) __attribute__((format(printf, 2, 3))) void cpr_sysexit(int exit_code, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+#ifndef _WIN32
+    if (logger)
+        vsyslog(LOG_CRIT, fmt, args);
+#endif
+    vfprintf(stderr, fmt, args); // FlawFinder: ignore
+    fputc('\n', stderr);
+    fflush(stderr);
+    va_end(args);
+    quick_exit(exit_code);
+}
+
 __attribute__((format(printf, 3, 4))) void cpr_logger(FILE *out, int level, const char *fmt, ...) {
     static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
     va_list args;
     va_start(args, fmt);
     const char *type = "note";
+#ifndef _WIN32
+    int priority = -1;
+#endif
     switch (level) {
     case 0:
         type = "fail";
-        cpr_syslog(LOG_ERR, fmt, args);
+#ifndef _WIN32
+        priority = LOG_ERR;
+#endif
         break;
     case 1:
         type = "warn";
-        cpr_syslog(LOG_WARNING, fmt, args);
+#ifndef _WIN32
+        priority = LOG_WARNING;
+#endif
         break;
     case 2:
         type = "info";
-        cpr_syslog(LOG_INFO, fmt, args);
+#ifndef _WIN32
+        priority = LOG_INFO;
+#endif
         break;
     case 3:
+#ifndef _WIN32
+        priority = LOG_NOTICE;
+#endif
         cpr_syslog(LOG_NOTICE, fmt, args);
         break;
     default:
 #ifndef NDEBUG
-        cpr_syslog(LOG_DEBUG, fmt, args);
+        priority = LOG_DEBUG;
 #endif
         break;
     }
+#ifndef _WIN32
+    if (priority != -1 && logger) vsyslog(priority, fmt, args);
+#endif
     if (cpr_verbose <= level) {
         pthread_mutex_lock(&mtx);
         time_t now;

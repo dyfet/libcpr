@@ -12,11 +12,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

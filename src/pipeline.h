@@ -5,6 +5,7 @@
 #define CPR_PIPELINE_H
 
 #include "clock.h"
+#include "memory.h"
 
 #include <stdatomic.h>
 
@@ -17,11 +18,11 @@ typedef struct pipeline {
     cnd_t input, output;
     size_t head, tail, count, size;
     atomic_bool closed;
-    void (*free)(void *);
+    cpr_free_t free;
     void *buf[];
 } pipeline_t;
 
-pipeline_t *make_pipeline(size_t size, int policy, void (*ff)(void *));
+pipeline_t *make_pipeline(size_t size, int policy, cpr_free_t ff);
 void close_pipeline(pipeline_t *pl);
 void free_pipeline(pipeline_t *pl);
 void *get_pipeline(pipeline_t *pl);

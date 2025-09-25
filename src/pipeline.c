@@ -5,9 +5,11 @@
 
 #include <stdlib.h>
 
-pipeline_t *make_pipeline(size_t size, int policy, void (*ff)(void *)) {
-    pipeline_t *pl = malloc(sizeof(pipeline_t) + (size * sizeof(void *)));
+pipeline_t *make_pipeline(size_t size, int policy, cpr_free_t ff) {
+    size_t alloc = sizeof(pipeline_t) + (size * sizeof(void *));
+    pipeline_t *pl = malloc(alloc);
     if (!pl) return NULL;
+    cpr_memset(pl, 0, alloc);
     if (ff == NULL) ff = &free;
     mtx_init(&pl->lock, mtx_plain);
     cnd_init(&pl->input);
@@ -51,6 +53,7 @@ void *get_pipeline(pipeline_t *pl) {
     while (!atomic_load(&pl->closed)) {
         if (pl->count > 0) {
             void *out = pl->buf[pl->head];
+            pl->buf[pl->head] = NULL;
             pl->head = (pl->head + 1) % pl->size;
             if (pl->count-- == pl->size)
                 cnd_signal(&pl->input);

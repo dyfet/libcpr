@@ -90,22 +90,9 @@ char *cpr_lower(const char *s, size_t max) {
     return m;
 }
 
-#ifdef _MSC_VER
-char *cpr_getenv(const char *s, size_t max) {
-    char *buf = NULL;
-    size_t sz = 0;
-    _dupenv_s(&buf, &sz, s);
-    if (buf != NULL && sz > max) {
-        free(buf);
-        return NULL;
-    }
-    return buf;
-}
-#else
 char *cpr_getenv(const char *s, size_t max) {
     return cpr_strdup(getenv(s), max); // FlawFinder: ignore
 }
-#endif
 
 bool cpr_equal(const char *s1, const char *s2) {
     if (s1 == s2)

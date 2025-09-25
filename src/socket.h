@@ -21,6 +21,7 @@ typedef int socklen_t;
 #include <arpa/inet.h>
 #include <poll.h>
 #include <ifaddrs.h>
+#include <stdbool.h>
 
 typedef struct ifaddrs *iface_t;
 #endif
@@ -33,6 +34,10 @@ typedef struct ifaddrs *iface_t;
 socklen_t cpr_socklen(const struct sockaddr *addr);
 void cpr_sockclose(int so);
 int cpr_sockinit();
+int cpr_getch(int so);
+bool cpr_putch(int so, char code);
+ssize_t cpr_getline(int so, char *text, size_t max, bool echo);
+ssize_t cpr_putline(int so, const char *str, size_t max);
 
 inline static struct sockaddr *to_sockaddr(struct sockaddr_storage *storage) {
     return (struct sockaddr *)storage;

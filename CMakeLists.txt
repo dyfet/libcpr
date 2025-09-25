@@ -2,7 +2,7 @@
 # Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
 cmake_minimum_required(VERSION 3.16.0)
-Project(libcpr VERSION 0.6.3 LANGUAGES C)
+Project(libcpr VERSION 0.7.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 17)
 set(C_STANDARD_REQUIRED 17)
 
@@ -43,6 +43,10 @@ target_link_options(cpr PUBLIC -pthread)
 add_executable(test_tty test/tty.c src/tty.h)
 add_test(NAME test-tty COMMAND test_tty)
 target_link_libraries(test_tty PRIVATE cpr)
+
+add_executable(test_bitset test/bitset.c src/bitset.h)
+add_test(NAME test-bitset COMMAND test_bitset)
+target_link_libraries(test_bitset PRIVATE cpr)
 
 add_executable(test_memory test/memory.c src/memory.h)
 add_test(NAME test-memory COMMAND test_memory)

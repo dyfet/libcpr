@@ -4,12 +4,11 @@
 #ifndef CPR_THREAD_H
 #define CPR_THREAD_H
 
-#if defined(_WIN32) || defined(__FreeBSD__)
-#define CPR_REQUIRES_PTHREAD 1
 #include <pthread.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sched.h>
+#include <stdint.h>
 
 typedef pthread_t thrd_t;
 typedef int (*thrd_start_t)(void *);
@@ -87,10 +86,6 @@ static inline int cnd_signal(cnd_t *cond) {
 static inline int cnd_broadcast(cnd_t *cond) {
     return pthread_cond_broadcast(cond) == 0 ? thrd_success : thrd_error;
 }
-
-#else
-#include <threads.h>
-#endif
 
 typedef struct {
     mtx_t mtx;

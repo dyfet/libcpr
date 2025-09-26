@@ -2,6 +2,7 @@
 // Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
 #include "clock.h"
+#include "thread.h"
 
 #include <errno.h>
 
@@ -87,6 +88,7 @@ void cpr_elapsed(const cpr_timepoint_t from, cpr_duration_t since) {
 }
 
 bool cpr_remains(const cpr_timepoint_t mono, cpr_duration_t rel) {
+    if (!mono || !rel) return false;
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
 
@@ -107,7 +109,7 @@ bool cpr_remains(const cpr_timepoint_t mono, cpr_duration_t rel) {
     return true;
 }
 
-void cpr_monoinit(pthread_cond_t *cond) {
+void cpr_monotonic(pthread_cond_t *cond) {
     pthread_condattr_t attr;
     pthread_condattr_init(&attr);
     pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
@@ -115,18 +117,21 @@ void cpr_monoinit(pthread_cond_t *cond) {
     pthread_condattr_destroy(&attr);
 }
 
-void cpr_monofree(pthread_cond_t *cond) {
-    pthread_cond_destroy(cond);
-}
-
-int cpr_monotimed(pthread_cond_t *cond, pthread_mutex_t *mtx, cpr_timepoint_t tp) {
+int cpr_timed(pthread_cond_t *cond, pthread_mutex_t *mtx, cpr_timepoint_t tp) {
     return pthread_cond_timedwait(cond, mtx, tp);
 }
 
-int cpr_monosleep(pthread_cond_t *cond, pthread_mutex_t *mtx, cpr_timepoint_t tp) {
+int cpr_until(cpr_timepoint_t tp) {
+    pthread_mutex_t mtx;
+    pthread_cond_t cond;
+    cpr_monotonic(&cond);
+    pthread_mutex_init(&mtx, NULL);
+    mtx_init(&mtx, mtx_plain);
     int rc;
     do {
-        rc = pthread_cond_timedwait(cond, mtx, tp);
+        rc = pthread_cond_timedwait(&cond, &mtx, tp);
     } while (rc == 0);
+    pthread_cond_destroy(&cond);
+    pthread_mutex_destroy(&mtx);
     return rc == ETIMEDOUT ? 0 : rc;
 }

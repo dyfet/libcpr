@@ -135,3 +135,19 @@ bool save_keyfile(const char *path, keysection_t *root) {
     fclose(fp);
     return true;
 }
+
+void free_keyfile(keysection_t *root) {
+    while (root != NULL) {
+        keysection_t *next_sect = root->next;
+        keydata_t *key = root->keys;
+        while (key != NULL) {
+            keydata_t *next_key = key->next;
+            free(key->id);
+            free(key->value);
+            free(key);
+            key = next_key;
+        }
+        free(root->id);
+        root = next_sect;
+    }
+}

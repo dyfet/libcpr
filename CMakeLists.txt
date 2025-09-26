@@ -76,6 +76,7 @@ add_test(NAME test-socket COMMAND test_socket)
 
 add_executable(test_clock test/clock.c src/clock.h)
 add_test(NAME test-clock COMMAND test_clock)
+target_link_libraries(test_clock PRIVATE cpr)
 
 add_executable(test_thread test/thread.c src/thread.h)
 add_test(NAME test-thread COMMAND test_thread)

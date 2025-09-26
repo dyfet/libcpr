@@ -28,10 +28,9 @@ bool cpr_remains(const cpr_timepoint_t mono, cpr_duration_t rel);
 long cpr_expires(const cpr_timepoint_t deadline, struct timeval *tv);
 void cpr_elapsed(const cpr_timepoint_t from, cpr_duration_t since);
 time_t cpr_time(const cpr_timepoint_t mono);
-void cpr_monoinit(pthread_cond_t *cond);
-void cpr_monofree(pthread_cond_t *cond);
-int cpr_monotimed(pthread_cond_t *cond, pthread_mutex_t *mtx, cpr_timepoint_t tp);
-int cpr_monosleep(pthread_cond_t *cond, pthread_mutex_t *mtx, cpr_timepoint_t tp);
+void cpr_monotonic(pthread_cond_t *cond);
+int cpr_timed(pthread_cond_t *cond, pthread_mutex_t *mtx, cpr_timepoint_t tp);
+int cpr_until(cpr_timepoint_t tp);
 
 #ifdef __cplusplus
 }

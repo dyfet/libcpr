@@ -16,6 +16,8 @@ extern "C" {
 typedef uint8_t *bits_t;
 
 bits_t cpr_makebits(size_t bitsize);
+bits_t cpr_makemask(bits_t bits, bits_t mask, size_t bitsize);
+void cpr_foldmask(bits_t bits, bits_t mask, size_t bitsize);
 void cpr_freebits(bits_t bits);
 bool cpr_bitget(bits_t bits, size_t offset);
 void cpr_bitset(bits_t bits, size_t offset);

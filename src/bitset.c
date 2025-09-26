@@ -24,6 +24,30 @@ bits_t cpr_makebits(size_t bitsize) {
     return bits;
 }
 
+bits_t cpr_makemask(bits_t bits, bits_t mask, size_t bitsize) {
+    if (!bitsize || !bits || !mask) return NULL;
+    bits_t out = cpr_makebits(bitsize);
+    if (!out) return NULL;
+    size_t size = cpr_bitsize(bitsize);
+    for (size_t pos = 0; pos < size; ++pos) {
+        out[pos] = bits[pos] & mask[pos];
+    }
+    return out;
+}
+
+void cpr_foldmask(bits_t bits, bits_t mask, size_t bitsize) {
+    if (!mask || !bitsize) return;
+    if (!bits) {
+        free(mask);
+        return;
+    }
+    size_t size = cpr_bitsize(bitsize);
+    for (size_t pos = 0; pos < size; ++pos) {
+        bits[pos] &= ~mask[pos];
+    }
+    free(mask);
+}
+
 void cpr_freebits(bits_t bits) {
     if (bits) free(bits);
 }

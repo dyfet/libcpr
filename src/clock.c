@@ -56,6 +56,9 @@ void cpr_addmsec(cpr_timepoint_t ts, long ms) {
     if (ts->tv_nsec >= 1000000000) {
         ts->tv_sec += 1;
         ts->tv_nsec -= 1000000000;
+    } else if (ts->tv_nsec < 0) {
+        ts->tv_sec -= 1;
+        ts->tv_nsec += 1000000000L;
     }
 }
 
@@ -122,16 +125,5 @@ int cpr_timed(pthread_cond_t *cond, pthread_mutex_t *mtx, cpr_timepoint_t tp) {
 }
 
 int cpr_until(cpr_timepoint_t tp) {
-    pthread_mutex_t mtx;
-    pthread_cond_t cond;
-    cpr_monotonic(&cond);
-    pthread_mutex_init(&mtx, NULL);
-    mtx_init(&mtx, mtx_plain);
-    int rc;
-    do {
-        rc = pthread_cond_timedwait(&cond, &mtx, tp);
-    } while (rc == 0);
-    pthread_cond_destroy(&cond);
-    pthread_mutex_destroy(&mtx);
-    return rc == ETIMEDOUT ? 0 : rc;
+    return clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, tp, NULL);
 }

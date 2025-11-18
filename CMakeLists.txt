@@ -26,7 +26,12 @@ file(GLOB markdown *.md)
 configure_file(libcpr.pc.in libcpr.pc)
 enable_testing()
 
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+if(WIN32)
+    option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+else()
+    option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+endif()
+
 add_library(cpr ${sources} ${headers})
 if(BUILD_SHARED_LIBS AND CMAKE_BUILD_TYPE MATCHES "^Rel")
     set_target_properties(cpr PROPERTIES

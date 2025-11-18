@@ -11,6 +11,11 @@
 #include <time.h>
 #include <sys/time.h>
 
+#ifdef  _WIN32
+#undef  CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC CLOCK_REALTIME
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

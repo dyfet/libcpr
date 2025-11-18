@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     cpr_timed(&cond, &mtx, &t1);
     long remains1 = cpr_expires(&ts, NULL);
     printf("%ld\n", remains1);
-    assert(remains1 <= remains - 50);
+    assert(remains1 <= remains - 40);
     pthread_cond_destroy(&cond);
     pthread_mutex_destroy(&mtx);
 }

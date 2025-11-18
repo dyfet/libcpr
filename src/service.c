@@ -129,7 +129,7 @@ __attribute__((format(printf, 3, 4))) void cpr_logger(FILE *out, int level, cons
         cpr_syslog(LOG_NOTICE, fmt, args);
         break;
     default:
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(_WIN32)
         priority = LOG_DEBUG;
 #endif
         break;

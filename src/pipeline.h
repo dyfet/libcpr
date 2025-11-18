@@ -4,7 +4,7 @@
 #ifndef CPR_PIPELINE_H
 #define CPR_PIPELINE_H
 
-#include "clock.h"
+#include "thread.h"
 #include "memory.h"
 
 #include <stdatomic.h>

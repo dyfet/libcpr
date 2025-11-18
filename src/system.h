@@ -12,6 +12,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <stdio.h>
+#include "time.h"
+#include "sys/time.h"
 
 #ifdef _WIN32
 #define MICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS 0
@@ -26,6 +28,9 @@
 #include <fileapi.h>
 #include <string.h>
 #endif
+
+#define ISO_DATETIME_FORMAT "%Y-%m-%dT%H:%M:%S%z"
+#define LOG_DATETIME_FORMAT "%Y-%m-%d %H:%M:%S"
 
 #if defined(__OpenBSD__)
 #define stat64 stat

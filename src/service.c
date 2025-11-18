@@ -4,7 +4,6 @@
 #include "service.h"
 #include "strchar.h"
 #include "thread.h"
-#include "clock.h"
 
 #ifdef _WIN32
 bool is_service() {

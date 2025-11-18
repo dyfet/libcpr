@@ -2,7 +2,7 @@
 # Copyright (C) 2025 David Sugar <tychosoft@gmail.com>
 
 cmake_minimum_required(VERSION 3.16.0)
-Project(libcpr VERSION 0.7.2 LANGUAGES C)
+Project(libcpr VERSION 0.8.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 17)
 set(C_STANDARD_REQUIRED 17)
 
@@ -78,10 +78,6 @@ add_test(NAME test-endian COMMAND test_endian)
 
 add_executable(test_socket test/socket.c src/socket.h)
 add_test(NAME test-socket COMMAND test_socket)
-
-add_executable(test_clock test/clock.c src/clock.h)
-add_test(NAME test-clock COMMAND test_clock)
-target_link_libraries(test_clock PRIVATE cpr)
 
 add_executable(test_thread test/thread.c src/thread.h)
 add_test(NAME test-thread COMMAND test_thread)

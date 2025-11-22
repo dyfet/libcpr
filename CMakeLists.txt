@@ -83,6 +83,10 @@ add_executable(test_thread test/thread.c src/thread.h)
 add_test(NAME test-thread COMMAND test_thread)
 target_link_libraries(test_thread PRIVATE cpr)
 
+add_executable(test_sync test/sync.c src/sync.h)
+add_test(NAME test-sync COMMAND test_sync)
+target_link_libraries(test_sync PRIVATE cpr)
+
 add_executable(test_keyfile test/keyfile.c src/keyfile.h)
 set_target_properties(test_keyfile PROPERTIES COMPILE_DEFINITIONS "TEST_DATA=\"${CMAKE_SOURCE_DIR}/test\"")
 target_link_libraries(test_keyfile PRIVATE cpr)

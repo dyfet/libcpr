@@ -9,11 +9,12 @@
 #include <errno.h>
 #include <string.h>
 
-unsigned int if_index = 0;
+multicast_t if_multicast;
 
 #ifdef _WIN32
 int make_multicast(const char *mcast, int family, uint16_t port) {
     int sock = -1;
+    memset(&if_multicast, 0, sizeof(if_multicast));
     ULONG bufsize = 8192;
     PIP_ADAPTER_ADDRESSES list = (PIP_ADAPTER_ADDRESSES)(malloc(bufsize));
     if (!list) {
@@ -33,6 +34,7 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
         exit(-1);
     }
 
+    const struct sockaddr_in *target = NULL;
     PIP_ADAPTER_ADDRESSES entry;
     bool found = false;
     for (entry = list; !found && entry != NULL; entry = entry->Next) {
@@ -40,8 +42,14 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
         if (entry->Flags & IP_ADAPTER_NO_MULTICAST) continue;
         PIP_ADAPTER_UNICAST_ADDRESS unicast;
         for (unicast = entry->FirstUnicastAddress; !found && unicast != NULL; unicast = unicast->Next) {
-            if (unicast->Address.lpSockaddr && unicast->Address.lpSockaddr->sa_family == family) found = true;
+            if (unicast->Address.lpSockaddr && unicast->Address.lpSockaddr->sa_family == family) {
+                if (family == AF_INET)
+                    target = (struct sockaddr_in *)&unicast->Address.lpSockaddr;
+                found = true;
+                break;
+            }
         }
+        if (found) break;
     }
 
     if (!entry) {
@@ -71,6 +79,13 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
             fprintf(stderr, "unable to BIND socket\n");
             exit(-5);
         }
+
+        struct in_addr if_addr = target->sin_addr;
+        if_multicast.ipv4.imr_interface = if_addr;
+        if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, (void *)&if_addr, sizeof(if_addr))) {
+            fprintf(stderr, "unable to set IP_MULTICAST_IF\n");
+            exit(-6);
+        }
     } else if (family == AF_INET6) {
         struct sockaddr_in6 mcaddr6;
         memset(&mcaddr6, 0, sizeof(mcaddr6));
@@ -83,7 +98,8 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
         }
 
         // Scope outbound multicast to the selected interface
-        if_index = if_nametoindex(mcast);
+        unsigned if_index = if_nametoindex(mcast);
+        if_multicast.ipv6.ipv6mr_interface = if_index;
         if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_IF, (void *)&if_index, sizeof(if_index)) < 0) {
             fprintf(stderr, "unable to set IPV6_MULTICAST_IF\n");
             exit(-6);
@@ -109,6 +125,7 @@ iface_t find_multicast(iface_t list, const char *iface, int family) {
 int make_multicast(const char *mcast, int family, uint16_t port) {
     int sock = -1;
     iface_t list;
+    memset(&if_multicast, 0, sizeof(if_multicast));
     if (getifaddrs(&list)) {
         perror("getifaddr");
         exit(-1);
@@ -142,6 +159,13 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
             fprintf(stderr, "unable to BIND socket\n");
             exit(-5);
         }
+        const struct sockaddr_in *target = (struct sockaddr_in *)iface->ifa_addr;
+        struct in_addr if_addr = target->sin_addr;
+        if_multicast.ipv4.imr_interface = if_addr;
+        if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, (void *)&if_addr, sizeof(if_addr))) {
+            fprintf(stderr, "unable to set IP_MULTICAST_IF\n");
+            exit(-6);
+        }
     } else if (family == AF_INET6) {
         struct sockaddr_in6 mcaddr6;
         memset(&mcaddr6, 0, sizeof(mcaddr6));
@@ -154,7 +178,8 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
         }
 
         // Scope outbound multicast to the selected interface
-        if_index = if_nametoindex(iface->ifa_name);
+        unsigned if_index = if_nametoindex(mcast);
+        if_multicast.ipv6.ipv6mr_interface = if_index;
         if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_IF, &if_index, sizeof(if_index)) < 0) {
             fprintf(stderr, "unable to set IPV6_MULTICAST_IF\n");
             exit(-6);
@@ -169,19 +194,16 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
 
 int join_multicast(int so, const struct sockaddr *member) {
     int res = 0;
-    multicast_t multicast;
+    multicast_t multicast = if_multicast;
 
     if (so < 0) return EBADF;
-    memset(&multicast, 0, sizeof(multicast));
     switch (member->sa_family) {
     case AF_INET:
-        multicast.ipv4.imr_interface.s_addr = INADDR_ANY;
         multicast.ipv4.imr_multiaddr = to_in4(member)->sin_addr;
         if (setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void *)&multicast, sizeof(multicast.ipv4)) == -1)
             res = errno;
         break;
     case AF_INET6:
-        multicast.ipv6.ipv6mr_interface = if_index;
         multicast.ipv6.ipv6mr_multiaddr = to_in6(member)->sin6_addr;
         if (setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (void *)&multicast, sizeof(multicast.ipv6)) == -1)
             res = errno;
@@ -194,19 +216,16 @@ int join_multicast(int so, const struct sockaddr *member) {
 
 int drop_multicast(int so, const struct sockaddr *member) {
     int res = 0;
-    multicast_t multicast;
+    multicast_t multicast = if_multicast;
 
     if (so < 0) return EBADF;
-    memset(&multicast, 0, sizeof(multicast));
     switch (member->sa_family) {
     case AF_INET:
-        multicast.ipv4.imr_interface.s_addr = INADDR_ANY;
         multicast.ipv4.imr_multiaddr = to_in4(member)->sin_addr;
         if (setsockopt(so, IPPROTO_IP, IP_DROP_MEMBERSHIP, (void *)&multicast, sizeof(multicast.ipv4)) == -1)
             res = errno;
         break;
     case AF_INET6:
-        multicast.ipv6.ipv6mr_interface = if_index;
         multicast.ipv6.ipv6mr_multiaddr = to_in6(member)->sin6_addr;
         if (setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (void *)&multicast, sizeof(multicast.ipv6)) == -1)
             res = errno;

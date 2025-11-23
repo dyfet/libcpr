@@ -5,9 +5,14 @@
 #include "strchar.h"
 #include "thread.h"
 
+#include <stdatomic.h>
+
+atomic_bool running = true;
+
 #ifdef _WIN32
 bool is_service() {
     bool isService = false;
+    atomic_init(&running, true);
     DWORD pid = GetCurrentProcessId();
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE) return false;
@@ -40,6 +45,7 @@ void cpr_openlog(const char *id, int facility, int flags) {}
 static bool logger = false;
 
 bool is_service() {
+    atomic_init(&running, true);
     return getuid() == 0 || getpid() == 1 || getppid() == 1;
 }
 
@@ -79,6 +85,17 @@ void cpr_openlog(const char *id, int facility, int flags) {
 }
 #endif
 
+bool is_running() {
+    if (!atomic_load(&running)) return false;
+    pthread_testcancel();
+    return true;
+}
+
+__attribute__((noreturn)) void cpr_shutdown(int excode) {
+    atomic_store(&running, false);
+    quick_exit(excode);
+}
+
 __attribute__((noreturn)) __attribute__((format(printf, 2, 3))) void cpr_sysexit(int exit_code, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
@@ -91,7 +108,7 @@ __attribute__((noreturn)) __attribute__((format(printf, 2, 3))) void cpr_sysexit
     fputc('\n', stderr);
     fflush(stderr);
     va_end(args);
-    quick_exit(exit_code);
+    cpr_shutdown(exit_code);
 }
 
 __attribute__((format(printf, 3, 4))) void cpr_logger(FILE *out, int level, const char *fmt, ...) {

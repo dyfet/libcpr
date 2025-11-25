@@ -17,6 +17,31 @@ if(WIN32)
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 endif()
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(PkgConfig REQUIRED)
+find_package(Threads REQUIRED)
+
+if(WIN32 OR MSYS)
+    list(APPEND EXTRA_LINK_LIBRARIES ws2_32 iphlpapi)
+    set(LIBCPR_EXTRA_LIBRARIES "${MICROBE_EXTRA_LIBRARIES} -lws2_32 -liphlpapi")
+endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBCPR_EXTRA_FLAGS}")
+
+add_compile_options(
+    -ffunction-sections
+    -fdata-sections
+)
+
+add_link_options(
+    -Wl,--no-whole-archive
+    -Wl,--gc-sections
+    -Wl,--gc-sections
+    -Wl,--as-needed
+    -Wl,--discard-all
+    -Wl,--no-undefined
+)
+
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(BUILD_DEBUG true)
     add_definitions(-DDEBUG)

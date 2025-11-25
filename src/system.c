@@ -123,48 +123,4 @@ ssize_t getline(char **lp, size_t *size, FILE *fp) {
     (*lp)[pos] = '\0';
     return (ssize_t)(pos);
 }
-
-int get_pass(char *buf, size_t size, const char *prompt) {
-    if (prompt == NULL) prompt = "Password: ";
-    if (!buf || size == 0) return -1;
-    DWORD mode;
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE || !GetConsoleMode(hStdin, &mode))
-        return -2;
-
-    fputs(prompt, stdout);
-    fflush(stdout);
-    if (!SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT))) return -3;
-    if (!fgets(buf, (int)size, stdin)) {
-        SetConsoleMode(hStdin, mode);
-        return -4;
-    }
-
-    SetConsoleMode(hStdin, mode);
-    fputs("\n", stdout);
-    buf[strcspn(buf, "\r\n")] = '\0';
-    return 0;
-}
-
-#else
-#include <termios.h>
-
-int get_pass(char *buf, size_t size, const char *prompt) {
-    if (prompt == NULL) prompt = "Password: ";
-    if (!buf || size == 0) return -1;
-    struct termios old, new;
-    if (tcgetattr(STDIN_FILENO, &old) != 0) return -1;
-    new = old;
-    new.c_lflag &= ~ECHO;
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &new) != 0) return -1;
-
-    fputs(prompt, stdout);
-    fflush(stdout);
-    if (!fgets(buf, (int)size, stdin)) buf[0] = '\0';
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &old);
-    printf("\n");
-    size_t len = cpr_strlen(buf, size);
-    if (len > 0 && buf[len - 1] == '\n') buf[len - 1] = '\0';
-    return 0;
-}
 #endif

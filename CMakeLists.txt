@@ -40,14 +40,10 @@ if(BUILD_SHARED_LIBS AND CMAKE_BUILD_TYPE MATCHES "^Rel")
     )
 endif()
 
-target_compile_options(cpr PUBLIC -pthread)
-target_link_options(cpr PUBLIC -pthread)
+#target_compile_options(cpr PUBLIC -pthread)
+target_link_libraries(cpr PUBLIC Threads::Threads ${EXTRA_LINK_LIBRARIES})
 
 # testing
-
-add_executable(test_tty test/tty.c src/tty.h)
-add_test(NAME test-tty COMMAND test_tty)
-target_link_libraries(test_tty PRIVATE cpr)
 
 add_executable(test_bitset test/bitset.c src/bitset.h)
 add_test(NAME test-bitset COMMAND test_bitset)

@@ -5,5 +5,5 @@ libdir=@CMAKE_INSTALL_FULL_LIBDIR@
 Name: libcpr
 Description: Simple C17 portable runtime header library
 Version: ${PROJECT_VERSION}
-Libs: -L${CMAKE_INSTALL_FULL_LIBDIR} -lcpr -lpthread
-Cflags: -I${CMAKE_INSTALL_FULL_INCLUDEDIR} -pthread @LIBCPR_EXTRA_FLAGS@
+Libs: -L${CMAKE_INSTALL_FULL_LIBDIR} -lcpr @LIBCPR_EXTRA_LIBRARIES@
+Cflags: -I${CMAKE_INSTALL_FULL_INCLUDEDIR} @LIBCPR_EXTRA_FLAGS@

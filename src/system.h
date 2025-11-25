@@ -61,7 +61,6 @@ __attribute__((format(printf, 2, 3))) void cpr_debug(int level, const char *fmt,
 int make_dir(const char *path, int perms);
 bool is_dir(const char *path);
 bool is_file(const char *path);
-int get_pass(char *buf, size_t size, const char *prompt);
 size_t scan_file(FILE *fp, size_t size, bool (*proc)(const char *, size_t));
 size_t scan_dir(DIR *dir, bool (*proc)(const struct dirent *));
 

@@ -17,13 +17,6 @@ level file descriptors. This provides a low level buffered i/o concept similar
 to bufio in golang. In addition, bufio handles tty descriptors by restoring
 terminal settings at close, and performing shutdown for sockets.
 
-## cpr/clock.h
-
-Hi resolution monotonic clocking functions and monotonic thread support. This
-supports converting monotonic timepoint for use with poll, select, ppoll, and
-pselect as well as with time\_t system time. This also supports monotonic
-deadline clock timing using pthread conditionals.
-
 ## cpr/endian.h
 
 Functions to store into and access memory pointer data by endian order.
@@ -53,11 +46,21 @@ threads.
 This provides a pager memory allocation system to create micro-heaps that can be
 disposed efficiently all at once.
 
+## cpr/multicast.h
+
+Basic multicast socket operation. Currently it creates a socket that binds to and
+operates under a specfied interface and includes helpers to join and drop multicast
+groups.
+
 ## cpr/pipeline.h
 
 A pipeline, much like a very simple go channel, to move object pointers between
 a producer and consumer thread per C11 threading. If drop policy is used then
 dropped packets in the pipeline are also free'd.
+
+## cpr/service.h
+
+Basic support for writing service daemons, including logging.
 
 ## cpr/socket.h
 
@@ -81,9 +84,9 @@ headers. It also may offer some missing library functions, particularly for
 mingw32 systems. Somewhat analogous to what the C++ filesystem header does.
 This is the only header meant as an abstraction layer.
 
-## cpr/tty.h
+## src/sync.h
 
-Low level access to and control over posix termios tty serial devices.
+Cross-platform monotonic clocking and deadline timing.
 
 ## cpr/thread.h
 

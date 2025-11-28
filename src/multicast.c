@@ -3,6 +3,7 @@
 
 #include "multicast.h"
 #include "strchar.h"
+#include "memory.h"
 
 #include <time.h>
 #include <stdio.h>
@@ -14,7 +15,7 @@ multicast_t if_multicast;
 #ifdef _WIN32
 int make_multicast(const char *mcast, int family, uint16_t port) {
     int sock = -1;
-    memset(&if_multicast, 0, sizeof(if_multicast));
+    cpr_memset(&if_multicast, 0, sizeof(if_multicast));
     ULONG bufsize = 8192;
     PIP_ADAPTER_ADDRESSES list = (PIP_ADAPTER_ADDRESSES)(malloc(bufsize));
     if (!list) {
@@ -71,7 +72,7 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
 
     if (family == AF_INET) {
         struct sockaddr_in mcaddr;
-        memset(&mcaddr, 0, sizeof(mcaddr));
+        cpr_memset(&mcaddr, 0, sizeof(mcaddr));
         mcaddr.sin_family = AF_INET;
         mcaddr.sin_addr.s_addr = htonl(INADDR_ANY);
         mcaddr.sin_port = htons(port);
@@ -88,7 +89,7 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
         }
     } else if (family == AF_INET6) {
         struct sockaddr_in6 mcaddr6;
-        memset(&mcaddr6, 0, sizeof(mcaddr6));
+        cpr_memset(&mcaddr6, 0, sizeof(mcaddr6));
         mcaddr6.sin6_family = AF_INET6;
         mcaddr6.sin6_addr = in6addr_any; // wildcard bind
         mcaddr6.sin6_port = htons(port);
@@ -125,7 +126,7 @@ iface_t find_multicast(iface_t list, const char *iface, int family) {
 int make_multicast(const char *mcast, int family, uint16_t port) {
     int sock = -1;
     iface_t list;
-    memset(&if_multicast, 0, sizeof(if_multicast));
+    cpr_memset(&if_multicast, 0, sizeof(if_multicast));
     if (getifaddrs(&list)) {
         perror("getifaddr");
         exit(-1);
@@ -151,7 +152,7 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
 
     if (family == AF_INET) {
         struct sockaddr_in mcaddr;
-        memset(&mcaddr, 0, sizeof(mcaddr));
+        cpr_memset(&mcaddr, 0, sizeof(mcaddr));
         mcaddr.sin_family = AF_INET;
         mcaddr.sin_addr.s_addr = htonl(INADDR_ANY);
         mcaddr.sin_port = htons(port);
@@ -168,7 +169,7 @@ int make_multicast(const char *mcast, int family, uint16_t port) {
         }
     } else if (family == AF_INET6) {
         struct sockaddr_in6 mcaddr6;
-        memset(&mcaddr6, 0, sizeof(mcaddr6));
+        cpr_memset(&mcaddr6, 0, sizeof(mcaddr6));
         mcaddr6.sin6_family = AF_INET6;
         mcaddr6.sin6_addr = in6addr_any; // wildcard bind
         mcaddr6.sin6_port = htons(port);

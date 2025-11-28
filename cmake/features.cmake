@@ -18,7 +18,6 @@ if(WIN32)
 endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
 
 if(WIN32 OR MSYS)

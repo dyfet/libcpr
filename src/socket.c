@@ -4,8 +4,6 @@
 #include "socket.h"
 #include "strchar.h"
 
-#include <string.h>
-#include <errno.h>
 #include <unistd.h>
 
 #ifdef _WIN32

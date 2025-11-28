@@ -72,6 +72,9 @@ target_link_libraries(test_strtype PRIVATE cpr)
 add_executable(test_endian test/endian.c src/endian.h)
 add_test(NAME test-endian COMMAND test_endian)
 
+add_executable(test_address test/address.c src/address.h)
+add_test(NAME test-address COMMAND test_address)
+
 add_executable(test_socket test/socket.c src/socket.h)
 add_test(NAME test-socket COMMAND test_socket)
 

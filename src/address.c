@@ -93,7 +93,7 @@ bool cpr_getbind(const char *to, int family, sockaddr_t *store, uint16_t port) {
     }
 
     if (target) {
-        cpr_memcpy(store, sizeof(struct sockaddr_storage), target, cpr_socklen(target));
+        cpr_memcpy(store, sizeof(sockaddr_t), target, cpr_socklen(target));
         cpr_addport(store, port);
     }
 
@@ -116,4 +116,21 @@ bool cpr_getbind(const char *to, int family, sockaddr_t *store, uint16_t port) {
     if (list) freeifaddrs(list);
     return addr != NULL;
 #endif
+}
+
+bool cpr_gethost(const char *host, const char *service, int family, int type, sockaddr_t *store) {
+    if (!host) return false;
+    if (family != AF_INET && family != AF_INET6) return false;
+    struct addrinfo hints, *res = NULL;
+    cpr_memset(&hints, 0, sizeof(hints));
+    hints.ai_family = family;
+    hints.ai_socktype = type;
+    hints.ai_flags = AI_ADDRCONFIG;
+
+    const int rc = getaddrinfo(host, service, &hints, &res);
+    if (rc != 0 || !res) return false;
+
+    cpr_memcpy(store, sizeof(sockaddr_t), res->ai_addr, res->ai_addrlen);
+    freeaddrinfo(res);
+    return true;
 }

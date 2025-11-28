@@ -16,6 +16,7 @@ typedef struct sockaddr_storage sockaddr_t;
 char *cpr_getaddr(sockaddr_t *store);
 bool cpr_addport(sockaddr_t *store, uint16_t port);
 bool cpr_getbind(const char *to, int family, sockaddr_t *store, uint16_t port);
+bool cpr_gethost(const char *host, const char *service, int family, int type, sockaddr_t *store);
 
 #ifdef __cplusplus
 }

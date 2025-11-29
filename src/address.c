@@ -33,7 +33,7 @@ char *cpr_getaddr(sockaddr_t *store) {
         out = inet_ntop(AF_INET, &a4->sin_addr, buf, sizeof(buf));
     } else if (store->ss_family == AF_INET6) {
         struct sockaddr_in6 *a6 = (struct sockaddr_in6 *)store;
-        out = inet_ntop(AF_INET, &a6->sin6_addr, buf, sizeof(buf));
+        out = inet_ntop(AF_INET6, &a6->sin6_addr, buf, sizeof(buf));
     }
     if (out) return cpr_strdup(out, sizeof(buf));
     return NULL;

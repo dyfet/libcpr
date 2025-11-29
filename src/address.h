@@ -13,6 +13,7 @@ extern "C" {
 
 typedef struct sockaddr_storage sockaddr_t;
 
+int cpr_setaddr(sockaddr_t *store, const char *addr);
 char *cpr_getaddr(sockaddr_t *store);
 bool cpr_addport(sockaddr_t *store, uint16_t port);
 bool cpr_getbind(const char *to, int family, sockaddr_t *store, uint16_t port);

@@ -20,6 +20,22 @@ bool cpr_addport(sockaddr_t *addr, uint16_t port) {
     return false;
 }
 
+int cpr_setaddr(sockaddr_t *store, const char *addr) {
+    if (!store) return AF_UNSPEC;
+    cpr_memset(store, 0, sizeof(sockaddr_t));
+    if (!addr || !*addr) return AF_UNSPEC;
+    if (strchr(addr, '.')) {
+        struct sockaddr_in *a4 = (struct sockaddr_in *)store;
+        if (inet_pton(AF_INET, addr, &a4->sin_addr) == 1)
+            store->ss_family = AF_INET;
+    } else if (strchr(addr, ':')) {
+        struct sockaddr_in6 *a6 = (struct sockaddr_in6 *)store;
+        if (inet_pton(AF_INET6, addr, &a6->sin6_addr) == 1)
+            store->ss_family = AF_INET6;
+    }
+    return store->ss_family;
+}
+
 char *cpr_getaddr(sockaddr_t *store) {
     char buf[INET6_ADDRSTRLEN + 1];
     if (!store) return NULL;

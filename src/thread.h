@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sched.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef pthread_t thrd_t;
 typedef int (*thrd_start_t)(void *);
@@ -96,6 +97,7 @@ typedef struct {
 typedef struct {
     mtx_t mtx;
     cnd_t cond;
+    bool shutdown;
     unsigned count, waits, used;
 } cpr_semaphore_t;
 
@@ -112,8 +114,9 @@ void cpr_condlock_release(cpr_condlock_t *lock);
 void cpr_condlock_modify(cpr_condlock_t *lock);
 void cpr_condlock_commit(cpr_condlock_t *lock);
 void cpr_semaphore_init(cpr_semaphore_t *sem, unsigned limit);
+void cpr_semaphore_shutdown(cpr_semaphore_t *sem);
 void cpr_semaphore_free(cpr_semaphore_t *sem);
-void cpr_semaphore_acquire(cpr_semaphore_t *sem);
+bool cpr_semaphore_acquire(cpr_semaphore_t *sem);
 void cpr_semaphore_release(cpr_semaphore_t *sem);
 void cpr_waitgroup_init(cpr_waitgroup_t *wg, unsigned count);
 void cpr_waitgroup_free(cpr_waitgroup_t *wg);

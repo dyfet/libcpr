@@ -62,6 +62,7 @@ void cpr_condlock_commit(cpr_condlock_t *lock) {
 
 void cpr_semaphore_init(cpr_semaphore_t *sem, unsigned limit) {
     if (!sem) return;
+    sem->shutdown = false;
     sem->count = limit;
     sem->waits = sem->used = 0;
     mtx_init(&sem->mtx, mtx_plain);
@@ -74,15 +75,25 @@ void cpr_semaphore_free(cpr_semaphore_t *sem) {
     mtx_destroy(&sem->mtx);
 }
 
-void cpr_semaphore_acquire(cpr_semaphore_t *sem) {
-    if (!sem) return;
+bool cpr_semaphore_acquire(cpr_semaphore_t *sem) {
+    if (!sem) return false;
     mtx_lock(&sem->mtx);
-    while (sem->used >= sem->count) {
+    while (sem->used >= sem->count && !sem->shutdown) {
         ++sem->waits;
         cnd_wait(&sem->cond, &sem->mtx);
         --sem->waits;
     }
     ++sem->used;
+    bool result = !sem->shutdown;
+    mtx_unlock(&sem->mtx);
+    return result;
+}
+
+void cpr_semaphore_shutdown(cpr_semaphore_t *sem) {
+    if (!sem) return;
+    mtx_lock(&sem->mtx);
+    sem->shutdown = true;
+    cnd_broadcast(&sem->cond);
     mtx_unlock(&sem->mtx);
 }
 

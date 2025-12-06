@@ -83,7 +83,8 @@ bool cpr_semaphore_acquire(cpr_semaphore_t *sem) {
         cnd_wait(&sem->cond, &sem->mtx);
         --sem->waits;
     }
-    ++sem->used;
+    if (!sem->shutdown)
+        ++sem->used;
     bool result = !sem->shutdown;
     mtx_unlock(&sem->mtx);
     return result;
@@ -93,7 +94,8 @@ void cpr_semaphore_shutdown(cpr_semaphore_t *sem) {
     if (!sem) return;
     mtx_lock(&sem->mtx);
     sem->shutdown = true;
-    cnd_broadcast(&sem->cond);
+    if (sem->waits)
+        cnd_broadcast(&sem->cond);
     mtx_unlock(&sem->mtx);
 }
 
